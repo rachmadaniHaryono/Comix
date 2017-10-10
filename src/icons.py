@@ -5,7 +5,7 @@ from __future__ import absolute_import
 import os
 import sys
 
-import gtk
+from gi.repository import Gtk,GdkPixbuf
 
 
 def load_icons():
@@ -46,15 +46,15 @@ def load_icons():
         return
 
     # Load window title icon.
-    pixbuf = gtk.gdk.pixbuf_new_from_file(os.path.join(icon_path, '16x16/comix.png'))
-    gtk.window_set_default_icon(pixbuf)
+    pixbuf = GdkPixbuf.Pixbuf.new_from_file(os.path.join(icon_path, '16x16/comix.png'))
+    Gtk.Window.set_default_icon(pixbuf)
     # Load application icons.
-    factory = gtk.IconFactory()
+    factory = Gtk.IconFactory()
     for filename, stockid in _icons:
         try:
             filename = os.path.join(icon_path, filename)
-            pixbuf = gtk.gdk.pixbuf_new_from_file(filename)
-            iconset = gtk.IconSet(pixbuf)
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
+            iconset = Gtk.IconSet(pixbuf)
             factory.add(stockid, iconset)
         except Exception:
             print('! Could not load icon "{}".'.format(filename))

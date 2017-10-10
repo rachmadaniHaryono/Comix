@@ -33,27 +33,21 @@ import sys
 
 # Check for PyGTK and PIL dependencies.
 try:
-    import pygtk
+    import gi
 
-    pygtk.require('2.0')
-    import gtk
+    gi.require_version('Gtk', '3.0')
+    from gi.repository import Gtk
+    from gi.repository import GObject
 
-    assert gtk.gtk_version >= (2, 12, 0)
-    assert gtk.pygtk_version >= (2, 12, 0)
-    import gobject
-
-    gobject.threads_init()
+    GObject.threads_init()
 except AssertionError:
-    print("You don't have the required versions of GTK+ and/or PyGTK "
-          "installed.")
-    print('Installed GTK+ version is: {}'.format('.'.join([str(n) for n in gtk.gtk_version])))
-    print('Required GTK+ version is: 2.12.0 or higher\n')
-    print('Installed PyGTK version is: {}'.format('.'.join([str(n) for n in gtk.pygtk_version])))
-    print('Required PyGTK version is: 2.12.0 or higher')
+    print("You don't have the required versions of GTK+ and/or PyGObject installed.")
+    print('Installed GTK+ version is: {}'.format('.'.join([str(n) for n in Gtk.gtk_version])))
+    print('Required GTK+ version is: 3.0.3 or higher\n')
     sys.exit(1)
 except ImportError:
-    print('PyGTK version 2.12.0 or higher is required to run Comix.')
-    print('No version of PyGTK was found on your system.')
+    print('PyGObject version 3.03 or higher is required to run Comix.')
+    print('No version of PyGObject was found on your system.')
     sys.exit(1)
 
 try:
@@ -142,12 +136,12 @@ def run():
     deprecated.check_for_deprecated_files(window)
 
     def sigterm_handler(signal, frame):
-        gobject.idle_add(window.terminate_program)
+        GObject.idle_add(window.terminate_program)
 
     signal.signal(signal.SIGTERM, sigterm_handler)
 
     try:
-        gtk.main()
+        Gtk.main()
     except KeyboardInterrupt:  # Will not always work because of threading.
         window.terminate_program()
 

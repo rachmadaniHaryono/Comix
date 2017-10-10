@@ -10,7 +10,7 @@ import sys
 import tempfile
 import threading
 
-import gtk
+from gi.repository import Gtk, GdkPixbuf
 
 from src import archive
 from src import cursor
@@ -72,9 +72,9 @@ class FileHandler(object):
                 If it isn't animated, load a pixbuf instead.  """
                 if not (prefs['animate gifs'] or prefs['animate']) \
                         or "gif" not in self._image_files[index][-3:].lower():
-                    self._raw_pixbufs[index] = gtk.gdk.pixbuf_new_from_file(self._image_files[index])
+                    self._raw_pixbufs[index] = GdkPixbuf.Pixbuf.new_from_file(self._image_files[index])
                 else:
-                    self._raw_pixbufs[index] = gtk.gdk.PixbufAnimation(self._image_files[index])
+                    self._raw_pixbufs[index] = GdkPixbuf.PixbufAnimation(self._image_files[index])
                     if self._raw_pixbufs[index].is_static_image():
                         self._raw_pixbufs[index] = self._raw_pixbufs[index].get_static_image()
             except Exception:
@@ -249,8 +249,8 @@ class FileHandler(object):
         self._window.cursor_handler.set_cursor_type(cursor.WAIT)
         if self.file_loaded:
             self.close_file()
-        while gtk.events_pending():
-            gtk.main_iteration(False)
+        while Gtk.events_pending():
+            Gtk.main_iteration(False)
 
         unknown_files = []
         # If <path> is an archive we create an Extractor for it and set the
@@ -505,7 +505,7 @@ class FileHandler(object):
         is None, return the size of the current page.
         """
         self._wait_on_page(page)
-        info = gtk.gdk.pixbuf_get_file_info(self.get_path_to_page(page))
+        info = GdkPixbuf.Pixbuf.get_file_info(self.get_path_to_page(page))
         if info is not None:
             return info[1], info[2]
         return 0, 0
@@ -515,7 +515,7 @@ class FileHandler(object):
         <page> is None, return the mime type name of the current page.
         """
         self._wait_on_page(page)
-        info = gtk.gdk.pixbuf_get_file_info(self.get_path_to_page(page))
+        info = GdkPixbuf.Pixbuf.get_file_info(self.get_path_to_page(page))
         if info is not None:
             return info[0]['name'].upper()
         return _('Unknown filetype')
@@ -535,17 +535,17 @@ class FileHandler(object):
         else:
             try:
                 if "gif" not in path[-3:].lower():
-                    thumb = gtk.gdk.pixbuf_new_from_file_at_size(path, width, height)
+                    thumb = GdkPixbuf.Pixbuf.new_from_file_at_size(path, width, height)
                 else:
-                    thumb = gtk.gdk.PixbufAnimation(path).get_static_image()
+                    thumb = GdkPixbuf.PixbufAnimation(path).get_static_image()
                     src_width = thumb.get_width()
                     src_height = thumb.get_height()
                     if float(src_width) / width > float(src_height) / height:
                         thumb = thumb.scale_simple(width,
-                                                   int(max(src_height * width / src_width, 1)), gtk.gdk.INTERP_TILES)
+                                                   int(max(src_height * width / src_width, 1)), GdkPixbuf.InterpType.TILES)
                     else:
                         thumb = thumb.scale_simple(int(max(src_width * height / src_height, 1)),
-                                                   height, gtk.gdk.INTERP_TILES)
+                                                   height, GdkPixbuf.InterpType.TILES)
             except Exception:
                 thumb = None
         if thumb is None:
@@ -613,8 +613,8 @@ class FileHandler(object):
 
     def _get_missing_image(self):
         """Return a pixbuf depicting a missing/broken image."""
-        return self._window.render_icon(gtk.STOCK_MISSING_IMAGE,
-                                        gtk.ICON_SIZE_DIALOG)
+        return self._window.render_icon(Gtk.STOCK_MISSING_IMAGE,
+                                        Gtk.IconSize.DIALOG)
 
     def _wait_on_page(self, page):
         """Block the running (main) thread until the file corresponding to
@@ -657,7 +657,7 @@ def is_image_file(path):
     """Return True if the file at <path> is an image file recognized by PyGTK.
     """
     if os.path.isfile(path):
-        info = gtk.gdk.pixbuf_get_file_info(path)
+        info = GdkPixbuf.Pixbuf.get_file_info(path)
         return info is not None
     return False
 

@@ -2,8 +2,8 @@
 """cursor.py - Cursor handler."""
 from __future__ import absolute_import
 
-import gobject
-import gtk
+from gi.repository import GObject
+from gi.repository import Gdk
 
 NORMAL, GRAB, WAIT = range(3)
 
@@ -18,14 +18,14 @@ class CursorHandler(object):
     def set_cursor_type(self, cursor):
         """Set the cursor to type <cursor>. Supported cursor types are
         available as constants in this module. If <cursor> is not one of the
-        cursor constants above, it must be a gtk.gdk.Cursor.
+        cursor constants above, it must be a Gdk.Cursor.
         """
         if cursor == NORMAL:
             mode = None
         elif cursor == GRAB:
-            mode = gtk.gdk.Cursor(gtk.gdk.FLEUR)
+            mode = Gdk.Cursor.new(Gdk.FLEUR)
         elif cursor == WAIT:
-            mode = gtk.gdk.Cursor(gtk.gdk.WATCH)
+            mode = Gdk.Cursor.new(Gdk.CursorType.WATCH)
         else:
             mode = cursor
         self._window.set_cursor(mode)
@@ -60,14 +60,14 @@ class CursorHandler(object):
 
     def _set_hide_timer(self):
         self._kill_timer()
-        self._timer_id = gobject.timeout_add(2000, self._window.set_cursor,
+        self._timer_id = GObject.timeout_add(2000, self._window.set_cursor,
                                              self._get_hidden_cursor())
 
     def _kill_timer(self):
         if self._timer_id is not None:
-            gobject.source_remove(self._timer_id)
+            GObject.source_remove(self._timer_id)
 
     def _get_hidden_cursor(self):
-        pixmap = gtk.gdk.Pixmap(None, 1, 1, 1)
-        color = gtk.gdk.Color()
-        return gtk.gdk.Cursor(pixmap, pixmap, color, color, 0, 0)
+        pixmap = Gdk.Pixmap(None, 1, 1, 1)
+        color = Gdk.Color()
+        return Gdk.Cursor.new(pixmap, pixmap, color, color, 0, 0)

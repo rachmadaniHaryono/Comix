@@ -5,7 +5,7 @@ from __future__ import absolute_import
 import os
 import sys
 
-import gtk
+from gi.repository import Gtk, GObject
 from PIL import Image
 
 from src import constants
@@ -16,17 +16,17 @@ ImageVersion = "Pillow-{}".format(Image.PILLOW_VERSION)
 _dialog = None
 
 
-class _AboutDialog(gtk.Dialog):
+class _AboutDialog(Gtk.Dialog):
 
     def __init__(self, window):
-        gtk.Dialog.__init__(self, _('About'), window, 0,
-                            (gtk.STOCK_CLOSE, gtk.RESPONSE_CLOSE))
+        GObject.GObject.__init__(self, _('About'), window, 0,
+                            (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE))
         self.set_has_separator(False)
         self.set_resizable(False)
         self.connect('response', _close_dialog)
-        self.set_default_response(gtk.RESPONSE_CLOSE)
+        self.set_default_response(Gtk.ResponseType.CLOSE)
 
-        notebook = gtk.Notebook()
+        notebook = Gtk.Notebook()
         self.vbox.pack_start(notebook, False, False, 0)
         self.set_border_width(4)
         notebook.set_border_width(6)
@@ -34,7 +34,7 @@ class _AboutDialog(gtk.Dialog):
         # ----------------------------------------------------------------
         # About tab.
         # ----------------------------------------------------------------
-        box = gtk.VBox(False, 0)
+        box = Gtk.VBox(False, 0)
         box.set_border_width(5)
         base = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))
         icon_path = os.path.join(base, 'images/comix.svg')
@@ -44,13 +44,13 @@ class _AboutDialog(gtk.Dialog):
                 if os.path.isfile(icon_path):
                     break
         try:
-            pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(icon_path, 200, 200)
-            icon = gtk.Image()
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(icon_path, 200, 200)
+            icon = Gtk.Image()
             icon.set_from_pixbuf(pixbuf)
             box.pack_start(icon, False, False, 10)
         except Exception:
             print('! Could not find the icon file "comix.svg"\n')
-        label = gtk.Label()
+        label = Gtk.Label()
         label.set_markup(
                 '<big><big><big><big><b><span foreground="#333333">Com</span>' +
                 '<span foreground="#79941b">ix</span> <span foreground="#333333">' +
@@ -74,20 +74,20 @@ class _AboutDialog(gtk.Dialog):
                 '\n' + _('Image processing library') + ': {}\n'.format(ImageVersion)
         )
         box.pack_start(label, True, True, 0)
-        label.set_justify(gtk.JUSTIFY_CENTER)
+        label.set_justify(Gtk.Justification.CENTER)
         label.set_selectable(True)
-        notebook.insert_page(box, gtk.Label(_('About')))
+        notebook.insert_page(box, Gtk.Label(label=_('About')))
 
         # ----------------------------------------------------------------
         # Credits tab.
         # ----------------------------------------------------------------
-        scrolled = gtk.ScrolledWindow()
-        scrolled.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
-        hbox = gtk.HBox(False, 5)
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        hbox = Gtk.HBox(False, 5)
         hbox.set_border_width(5)
         scrolled.add_with_viewport(hbox)
-        left_box = gtk.VBox(True, 8)
-        right_box = gtk.VBox(True, 8)
+        left_box = Gtk.VBox(True, 8)
+        right_box = Gtk.VBox(True, 8)
         hbox.pack_start(left_box, False, False)
         hbox.pack_start(right_box, False, False)
         for nice_person, description in (
@@ -123,10 +123,10 @@ class _AboutDialog(gtk.Dialog):
             name_label = labels.BoldLabel('{}:'.format(nice_person))
             name_label.set_alignment(1.0, 1.0)
             left_box.pack_start(name_label, True, True)
-            desc_label = gtk.Label(description)
+            desc_label = Gtk.Label(label=description)
             desc_label.set_alignment(0, 1.0)
             right_box.pack_start(desc_label, True, True)
-        notebook.insert_page(scrolled, gtk.Label(_('Credits')))
+        notebook.insert_page(scrolled, Gtk.Label(label=_('Credits')))
         self.show_all()
 
 

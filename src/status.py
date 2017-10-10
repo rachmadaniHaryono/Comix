@@ -2,16 +2,16 @@
 """status.py - Statusbar for main window."""
 from __future__ import absolute_import
 
-import gtk
+from gi.repository import Gtk, GObject
 
 from src import encoding
 
 
-class Statusbar(gtk.Statusbar):
+class Statusbar(Gtk.Statusbar):
 
     def __init__(self):
-        gtk.Statusbar.__init__(self)
-        self.set_has_resize_grip(True)
+        GObject.GObject.__init__(self)
+        # self.set_has_resize_grip(True) # TODO No longer available
         self._page_info = ''
         self._resolution = ''
         self._root = ''

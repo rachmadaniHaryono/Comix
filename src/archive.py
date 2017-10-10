@@ -10,7 +10,7 @@ import tarfile
 import threading
 import zipfile
 
-import gtk
+from gi.repository import Gtk
 
 try:
     from py7zlib import Archive7z
@@ -71,8 +71,8 @@ class Extractor(object):
                 _rar_exec = _get_rar_exec()
                 if _rar_exec is None:
                     print('! Could not find RAR file extractor.')
-                    dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_WARNING,
-                                               gtk.BUTTONS_CLOSE,
+                    dialog = Gtk.MessageDialog(None, 0, Gtk.MessageType.WARNING,
+                                               Gtk.ButtonsType.CLOSE,
                                                _("Could not find RAR file extractor!"))
                     dialog.format_secondary_markup(_("You need either the <i>rar</i> or the"
                                                      " <i>unrar</i> program installed in order "
@@ -113,8 +113,8 @@ class Extractor(object):
                 proc.wait()
 
             if not _7z_exec and not Archive7z:
-                dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_WARNING,
-                                           gtk.BUTTONS_CLOSE,
+                dialog = Gtk.MessageDialog(None, 0, Gtk.MessageType.WARNING,
+                                           Gtk.ButtonsType.CLOSE,
                                            _("Could not find 7Z file extractor!"))
                 dialog.format_secondary_markup(_("You need either the <i>pylzma</i> "
                                                  "or the <i>p7zip</i> program installed "

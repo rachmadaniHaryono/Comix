@@ -5,16 +5,16 @@ from __future__ import absolute_import
 import os
 import shutil
 
-import gtk
+from gi.repository import Gtk
 
 from src import constants
 
 
-class _CleanerDialog(gtk.MessageDialog):
+class _CleanerDialog(Gtk.MessageDialog):
 
     def __init__(self, window, paths):
-        gtk.MessageDialog.__init__(self, window, 0, gtk.MESSAGE_QUESTION,
-                                   gtk.BUTTONS_YES_NO,
+        GObject.GObject.__init__(self, window, 0, Gtk.MessageType.QUESTION,
+                                   Gtk.ButtonsType.YES_NO,
                                    _('There are deprecated files left on your computer.'))
 
         self._paths = paths
@@ -27,7 +27,7 @@ class _CleanerDialog(gtk.MessageDialog):
                   'disk space. Do you want these files to be removed for you now?'))
 
     def _response(self, dialog, response):
-        if response == gtk.RESPONSE_YES:
+        if response == Gtk.ResponseType.YES:
             for path in self._paths:
                 try:
                     if os.path.isdir(path):
