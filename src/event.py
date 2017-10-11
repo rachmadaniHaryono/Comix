@@ -96,7 +96,7 @@ class EventHandler(object):
             self._window.actiongroup.get_action('zoom_in').activate()
         elif event.keyval == Gdk.KEY_minus:
             self._window.actiongroup.get_action('zoom_out').activate()
-        elif event.keyval in (Gdk.KEY__0, Gdk.KEY_KP_0) and 'GDK_CONTROL_MASK' in event.get_state().value_names:
+        elif event.keyval in (Gdk.KEY_0, Gdk.KEY_KP_0) and 'GDK_CONTROL_MASK' in event.get_state().value_names:
             self._window.actiongroup.get_action('zoom_original').activate()
 
         # ----------------------------------------------------------------

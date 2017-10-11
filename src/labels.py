@@ -13,7 +13,8 @@ class FormattedLabel(Gtk.Label):
 
     def __init__(self, text='', weight=Pango.Weight.NORMAL,
                  style=Pango.Style.NORMAL, scale=1.0):
-        GObject.GObject.__init__(self, text)
+        # GObject.GObject.__init__(self, text) # TODO GObject.__init__ no longer takes arguments
+        GObject.GObject.__init__(self)
         self._weight = weight
         self._style = style
         self._scale = scale
@@ -25,11 +26,11 @@ class FormattedLabel(Gtk.Label):
 
     def _format(self):
         text_len = len(self.get_text())
-        attrlist = Pango.AttrList()
-        attrlist.insert(Pango.AttrWeight(self._weight, 0, text_len))
-        attrlist.insert(Pango.AttrStyle(self._style, 0, text_len))
-        attrlist.insert(Pango.AttrScale(self._scale, 0, text_len))
-        self.set_attributes(attrlist)
+        # attrlist = Pango.AttrList()
+        # attrlist.insert(Pango.AttrWeight(self._weight, 0, text_len))
+        # attrlist.insert(Pango.AttrStyle(self._style, 0, text_len))
+        # attrlist.insert(Pango.AttrScale(self._scale, 0, text_len))
+        # self.set_attributes(attrlist)
 
 
 class BoldLabel(FormattedLabel):

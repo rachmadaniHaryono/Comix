@@ -5,8 +5,8 @@ from __future__ import absolute_import
 import os
 import sys
 
-from gi.repository import Gtk, GObject
 from PIL import Image
+from gi.repository import GObject, GdkPixbuf, Gtk
 
 from src import constants
 from src import labels
@@ -19,9 +19,9 @@ _dialog = None
 class _AboutDialog(Gtk.Dialog):
 
     def __init__(self, window):
-        GObject.GObject.__init__(self, _('About'), window, 0,
-                            (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE))
-        self.set_has_separator(False)
+        # GObject.GObject.__init__(self, _('About'), window, 0, (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)) # TODO GObject.__init__ no longer takes arguments
+        GObject.GObject.__init__(self)
+        # self.set_has_separator(False) # TODO Removed in GTK3
         self.set_resizable(False)
         self.connect('response', _close_dialog)
         self.set_default_response(Gtk.ResponseType.CLOSE)
@@ -62,13 +62,13 @@ class _AboutDialog(Gtk.Dialog):
                 '\n\n' +
                 _('Comix is licensed under the GNU General Public License.') +
                 '\n\n' +
-                '<small>Copyright © 2005-2009 Pontus Ekberg\n\n' +
+                u'<small>Copyright © 2005-2009 Pontus Ekberg\n\n' +
                 'herrekberg@users.sourceforge.net\n' +
                 'http://comix.sourceforge.net</small>\n' +
-                '<small>Copyright © 2010-2017 David Pineau\n\n' +
+                u'<small>Copyright © 2010-2017 David Pineau\n\n' +
                 'dav.pineau@gmail.com\n' +
                 'https://github.com/Joacchim/Comix</small>\n' +
-                '<small>Copyright © 2014-2017 Sergey Dryabzhinsky\n\n' +
+                u'<small>Copyright © 2014-2017 Sergey Dryabzhinsky\n\n' +
                 'sergey.dryabzhinksy@gmail.com\n' +
                 'https://github.com/sergey-dryabzhinksy/Comix</small>\n' +
                 '\n' + _('Image processing library') + ': {}\n'.format(ImageVersion)
@@ -76,7 +76,7 @@ class _AboutDialog(Gtk.Dialog):
         box.pack_start(label, True, True, 0)
         label.set_justify(Gtk.Justification.CENTER)
         label.set_selectable(True)
-        notebook.insert_page(box, Gtk.Label(label=_('About')))
+        notebook.insert_page(box, Gtk.Label(label=_('About')), 0)
 
         # ----------------------------------------------------------------
         # Credits tab.
@@ -88,8 +88,8 @@ class _AboutDialog(Gtk.Dialog):
         scrolled.add_with_viewport(hbox)
         left_box = Gtk.VBox(True, 8)
         right_box = Gtk.VBox(True, 8)
-        hbox.pack_start(left_box, False, False)
-        hbox.pack_start(right_box, False, False)
+        hbox.pack_start(left_box, False, False, 0)
+        hbox.pack_start(right_box, False, False, 0)
         for nice_person, description in (
                 ('Pontus Ekberg', _('Developer')),
                 ('Emfox Zhou', _('Simplified Chinese translation')),
@@ -122,11 +122,11 @@ class _AboutDialog(Gtk.Dialog):
                 ('Victor Castillejo', _('Icon design'))):
             name_label = labels.BoldLabel('{}:'.format(nice_person))
             name_label.set_alignment(1.0, 1.0)
-            left_box.pack_start(name_label, True, True)
+            left_box.pack_start(name_label, True, True, 0)
             desc_label = Gtk.Label(label=description)
             desc_label.set_alignment(0, 1.0)
-            right_box.pack_start(desc_label, True, True)
-        notebook.insert_page(scrolled, Gtk.Label(label=_('Credits')))
+            right_box.pack_start(desc_label, True, True, 0)
+        notebook.insert_page(scrolled, Gtk.Label(label=_('Credits')), 0)
         self.show_all()
 
 

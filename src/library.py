@@ -7,13 +7,13 @@ import os
 import urllib
 from xml.sax.saxutils import escape as xmlescape
 
-from gi.repository import GObject
-from gi.repository import Gtk
-from gi.repository import Pango
-from gi.repository import GdkPixbuf
-from gi.repository import Gdk
 from PIL import Image
 from PIL import ImageDraw
+from gi.repository import GObject
+from gi.repository import Gdk
+from gi.repository import GdkPixbuf
+from gi.repository import Gtk
+from gi.repository import Pango
 
 from src import archive
 from src import encoding
@@ -36,7 +36,8 @@ class _LibraryDialog(Gtk.Window):
     """
 
     def __init__(self, file_handler):
-        GObject.GObject.__init__(self, Gtk.WindowType.TOPLEVEL)
+        # GObject.GObject.__init__(self, Gtk.WindowType.TOPLEVEL) # TODO GObject.__init__ no longer takes arguments
+        GObject.GObject.__init__(self)
         self.resize(prefs['lib window width'], prefs['lib window height'])
         self.set_title(_('Library'))
         self.connect('delete_event', self.close)
@@ -44,7 +45,7 @@ class _LibraryDialog(Gtk.Window):
         self.filter_string = None
         self._file_handler = file_handler
         self._statusbar = Gtk.Statusbar()
-        self._statusbar.set_has_resize_grip(True)
+        # self._statusbar.set_has_resize_grip(True) # TODO Removed in GTK3
         self.backend = librarybackend.LibraryBackend()
         self.book_area = _BookArea(self)
         self.control_area = _ControlArea(self)
@@ -433,7 +434,7 @@ class _CollectionArea(Gtk.ScrolledWindow):
         # context.set_icon_pixmap() seems to cause crashes, so we do a
         # quick and dirty conversion to pixbuf.
         pointer = GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB, True, 8,
-                                 *pixmap.get_size())
+                                   *pixmap.get_size())
         pointer = pointer.get_from_drawable(pixmap, treeview.get_colormap(),
                                             0, 0, 0, 0, *pixmap.get_size())
         context.set_icon_pixbuf(pointer, -5, -5)
@@ -460,12 +461,12 @@ class _BookArea(Gtk.ScrolledWindow):
         self._iconview.connect('drag_data_received', self._drag_data_received)
         self._iconview.connect('button_press_event', self._button_press)
         self._iconview.connect('key_press_event', self._key_press)
-        self._iconview.modify_base(Gtk.StateType.NORMAL, Gdk.Color())  # Black.
+        # self._iconview.modify_base(Gtk.StateType.NORMAL, Gdk.Color())  # Black. # TODO not working in GTK3
         self._iconview.enable_model_drag_source(0,
-                                                [('book', Gtk.TargetFlags.SAME_APP, _DRAG_BOOK_ID)],
+                                                [Gtk.TargetEntry.new('book', Gtk.TargetFlags.SAME_APP, _DRAG_BOOK_ID)],
                                                 Gdk.DragAction.MOVE)
         self._iconview.drag_dest_set(Gtk.DestDefaults.ALL,
-                                     [('text/uri-list', 0, _DRAG_EXTERNAL_ID)],
+                                     [Gtk.TargetEntry.new('text/uri-list', 0, _DRAG_EXTERNAL_ID)],
                                      Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
         self._iconview.set_selection_mode(Gtk.SelectionMode.MULTIPLE)
         self.add(self._iconview)
@@ -668,7 +669,7 @@ class _BookArea(Gtk.ScrolledWindow):
             cover_width = cover.get_width()
             cover_height = cover.get_height()
             pointer = GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB, True, 8,
-                                     max(30, cover_width + 15), max(30, cover_height + 10))
+                                       max(30, cover_width + 15), max(30, cover_height + 10))
             pointer.fill(0x00000000)
             cover.composite(pointer, 0, 0, cover_width, cover_height, 0, 0,
                             1, 1, GdkPixbuf.InterpType.TILES, 255)
@@ -729,7 +730,8 @@ class _ControlArea(Gtk.HBox):
 
     def __init__(self, library):
         self._library = library
-        GObject.GObject.__init__(self, False, 12)
+        # GObject.GObject.__init__(self, False, 12) # TODO GObject.__init__ no longer takes arguments
+        GObject.GObject.__init__(self)
 
         self.set_border_width(10)
         borderbox = Gtk.EventBox()
@@ -740,32 +742,32 @@ class _ControlArea(Gtk.HBox):
         insidebox.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse('#ddb'))
         infobox = Gtk.VBox(False, 5)
         infobox.set_border_width(10)
-        self.pack_start(borderbox, False, False)
+        self.pack_start(borderbox, False, False, 0)
         borderbox.add(insidebox)
         insidebox.add(infobox)
         self._namelabel = labels.BoldLabel()
         self._namelabel.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
         self._namelabel.set_alignment(0, 0.5)
-        infobox.pack_start(self._namelabel, False, False)
+        infobox.pack_start(self._namelabel, False, False, 0)
         self._pageslabel = Gtk.Label()
         self._pageslabel.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
         self._pageslabel.set_alignment(0, 0.5)
-        infobox.pack_start(self._pageslabel, False, False)
+        infobox.pack_start(self._pageslabel, False, False, 0)
         self._filelabel = Gtk.Label()
         self._filelabel.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
         self._filelabel.set_alignment(0, 0.5)
-        infobox.pack_start(self._filelabel, False, False)
+        infobox.pack_start(self._filelabel, False, False, 0)
         self._dirlabel = Gtk.Label()
         self._dirlabel.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
         self._dirlabel.set_alignment(0, 0.5)
-        infobox.pack_start(self._dirlabel, False, False)
+        infobox.pack_start(self._dirlabel, False, False, 0)
 
         vbox = Gtk.VBox(False, 10)
-        self.pack_start(vbox, True, True)
+        self.pack_start(vbox, True, True, 0)
         hbox = Gtk.HBox(False)
-        vbox.pack_start(hbox, False, False)
+        vbox.pack_start(hbox, False, False, 0)
         label = Gtk.Label(label='{}:'.format(_('Search')))
-        hbox.pack_start(label, False, False)
+        hbox.pack_start(label, False, False, 0)
         search_entry = Gtk.Entry()
         search_entry.connect('activate', self._filter_books)
         search_entry.set_tooltip_text(_('Display only those books that have '
@@ -777,35 +779,32 @@ class _ControlArea(Gtk.HBox):
         hbox.pack_start(label, False, False, 6)
         adjustment = Gtk.Adjustment(prefs['library cover size'], 50, 128, 1,
                                     10, 0)
-        cover_size_scale = Gtk.HScale(adjustment)
+        # cover_size_scale = Gtk.HScale(adjustment) # TODO GObject.__init__ no longer takes arguments
+        cover_size_scale = Gtk.HScale()
         cover_size_scale.set_size_request(150, -1)
         cover_size_scale.set_draw_value(False)
         cover_size_scale.connect('value_changed', self._change_cover_size)
-        hbox.pack_start(cover_size_scale, False, False)
-        vbox.pack_start(Gtk.HBox( True, True, 0), True, True)
+        hbox.pack_start(cover_size_scale, False, False, 0)
+        vbox.pack_start(Gtk.HBox(True, True, 0), True, True, 0)
 
         hbox = Gtk.HBox(False, 10)
-        vbox.pack_start(hbox, False, False)
+        vbox.pack_start(hbox, False, False, 0)
         add_book_button = Gtk.Button(_('Add books'))
-        add_book_button.set_image(Gtk.Image.new_from_stock(
-                Gtk.STOCK_ADD, Gtk.IconSize.BUTTON))
+        add_book_button.set_image(Gtk.Image.new_from_stock(Gtk.STOCK_ADD, Gtk.IconSize.BUTTON))
         add_book_button.connect('clicked', self._add_books)
         add_book_button.set_tooltip_text(_('Add more books to the library.'))
-        hbox.pack_start(add_book_button, False, False)
+        hbox.pack_start(add_book_button, False, False, 0)
         add_collection_button = Gtk.Button(_('Add collection'))
         add_collection_button.connect('clicked', self._add_collection)
-        add_collection_button.set_image(Gtk.Image.new_from_stock(
-                Gtk.STOCK_ADD, Gtk.IconSize.BUTTON))
-        add_collection_button.set_tooltip_text(
-                _('Add a new empty collection.'))
-        hbox.pack_start(add_collection_button, False, False)
-        hbox.pack_start(Gtk.HBox( True, True, 0), True, True)
+        add_collection_button.set_image(Gtk.Image.new_from_stock(Gtk.STOCK_ADD, Gtk.IconSize.BUTTON))
+        add_collection_button.set_tooltip_text(_('Add a new empty collection.'))
+        hbox.pack_start(add_collection_button, False, False, 0)
+        hbox.pack_start(Gtk.HBox(True, True, 0), True, True, 0)
         self._open_button = Gtk.Button(None, Gtk.STOCK_OPEN)
-        self._open_button.connect('clicked',
-                                  self._library.book_area.open_selected_book)
+        self._open_button.connect('clicked', self._library.book_area.open_selected_book)
         self._open_button.set_tooltip_text(_('Open the selected book.'))
         self._open_button.set_sensitive(False)
-        hbox.pack_start(self._open_button, False, False)
+        hbox.pack_start(self._open_button, False, False, 0)
 
     def update_info(self, selected):
         """Update the info box using the currently <selected> books from
@@ -873,7 +872,7 @@ class _ControlArea(Gtk.HBox):
                 prefs['last library collection'] = collection
                 self._library.collection_area.display_collections()
             else:
-                message = _("Could not add a new collection called '{}'.") .format(name)
+                message = _("Could not add a new collection called '{}'.").format(name)
                 if self._library.backend.get_collection_by_name(name) is not None:
                     message = '{} {}'.format(message, _('A collection by that name already exists.'))
                 self._library.set_status_message(message)
@@ -904,7 +903,7 @@ class _AddBooksProgressDialog(Gtk.Dialog):
         <collection>, unless it is None.
         """
         GObject.GObject.__init__(self, _('Adding books'), library,
-                            Gtk.DialogFlags.MODAL, (Gtk.STOCK_STOP, Gtk.ResponseType.CLOSE))
+                                 Gtk.DialogFlags.MODAL, (Gtk.STOCK_STOP, Gtk.ResponseType.CLOSE))
         self._destroy = False
         self.set_size_request(400, -1)
         self.set_has_separator(False)

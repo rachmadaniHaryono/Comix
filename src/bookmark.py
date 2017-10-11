@@ -6,6 +6,7 @@ import cPickle
 import os
 
 from gi.repository import GObject
+from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 
 from src import constants
@@ -223,12 +224,13 @@ class _BookmarksDialog(Gtk.Dialog):
     """_BookmarksDialog lets the user remove and/or rearrange bookmarks."""
 
     def __init__(self, window, bookmarks_store):
-        GObject.GObject.__init__(self, _('Edit bookmarks'), window, Gtk.DialogFlags.MODAL,
-                            (Gtk.STOCK_REMOVE, Gtk.ResponseType.NO, Gtk.STOCK_CLOSE,
-                             Gtk.ResponseType.CLOSE))
+        # GObject.GObject.__init__(self, _('Edit bookmarks'), window, Gtk.DialogFlags.MODAL,
+        #                     (Gtk.STOCK_REMOVE, Gtk.ResponseType.NO, Gtk.STOCK_CLOSE,
+        #                      Gtk.ResponseType.CLOSE))  # TODO GObject.__init__ no longer takes arguments
+        GObject.GObject.__init__(self)
         self._bookmarks_store = bookmarks_store
 
-        self.set_has_separator(False)
+        # self.set_has_separator(False) # TODO Removed in GTK3
         self.set_resizable(True)
         self.set_default_response(Gtk.ResponseType.CLOSE)
 
@@ -298,7 +300,7 @@ class _BookmarksDialog(Gtk.Dialog):
         """Close the dialog and update the _BookmarksStore with the new
         ordering."""
         ordering = []
-        treeiter = self._liststore.get_iter_root()
+        treeiter = self._liststore.get_iter_first()
         while treeiter is not None:
             bookmark = self._liststore.get_value(treeiter, 3)
             ordering.insert(0, bookmark)

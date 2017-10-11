@@ -72,10 +72,6 @@ class ThumbnailSidebar(Gtk.HBox):
         """Show the ThumbnailSidebar."""
         self.show_all()
 
-    def hide(self):
-        """Hide the ThumbnailSidebar."""
-        self.hide_all()
-
     def clear(self):
         """Clear the ThumbnailSidebar of any loaded thumbnails."""
         self._liststore.clear()

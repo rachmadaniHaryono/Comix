@@ -173,7 +173,7 @@ class MainWindow(Gtk.Window):
                                      Gdk.EventMask.BUTTON_RELEASE_MASK |
                                      Gdk.EventMask.POINTER_MOTION_MASK)
         self._main_layout.drag_dest_set(Gtk.DestDefaults.ALL,
-                                        [Gtk.TargetEntry('text/uri-list', 0, 0)],
+                                        [Gtk.TargetEntry.new('text/uri-list', 0, 0)],
                                         Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
 
         self.connect('delete_event', self.terminate_program)
@@ -740,6 +740,7 @@ class MainWindow(Gtk.Window):
         """Set the background colour to <colour>. Colour is a sequence in the
         format (r, g, b). Values are 16-bit.
         """
+        # TODO Removed in GTK3
         # self._main_layout.modify_bg(Gtk.StateType.NORMAL,
         #                             Gdk.colormap_get_system().alloc_color(Gdk.Color(
         #                                     colour[0], colour[1], colour[2]), False, True))
@@ -752,39 +753,39 @@ class MainWindow(Gtk.Window):
             if prefs['show toolbar']:
                 self.toolbar.show_all()
             else:
-                self.toolbar.hide_all()
+                self.toolbar.hide()
             if prefs['show statusbar']:
                 self.statusbar.show_all()
             else:
-                self.statusbar.hide_all()
+                self.statusbar.hide()
             if prefs['show menubar']:
                 self.menubar.show_all()
             else:
-                self.menubar.hide_all()
+                self.menubar.hide()
             if prefs['show scrollbar'] and self.zoom_mode == preferences.ZOOM_MODE_WIDTH:
                 self._vscroll.show_all()
-                self._hscroll.hide_all()
+                self._hscroll.hide()
             elif prefs['show scrollbar'] and self.zoom_mode == preferences.ZOOM_MODE_HEIGHT:
-                self._vscroll.hide_all()
+                self._vscroll.hide()
                 self._hscroll.show_all()
             elif prefs['show scrollbar'] and self.zoom_mode == preferences.ZOOM_MODE_MANUAL:
                 self._vscroll.show_all()
                 self._hscroll.show_all()
             else:
                 pass
-                # self._vscroll.hide_all()
-                # self._hscroll.hide_all()
+                self._vscroll.hide()
+                self._hscroll.hide()
             if prefs['show thumbnails']:
                 self.thumbnailsidebar.show()
             else:
                 self.thumbnailsidebar.hide()
         else:
-            self.toolbar.hide_all()
-            self.menubar.hide_all()
-            self.statusbar.hide_all()
+            self.toolbar.hide()
+            self.menubar.hide()
+            self.statusbar.hide()
             self.thumbnailsidebar.hide()
-            self._vscroll.hide_all()
-            self._hscroll.hide_all()
+            self._vscroll.hide()
+            self._hscroll.hide()
 
     def terminate_program(self, *args):
         """Run clean-up tasks and exit the program."""

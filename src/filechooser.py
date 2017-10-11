@@ -4,9 +4,9 @@ from __future__ import absolute_import
 
 import os
 
+from gi.repository import GObject
 from gi.repository import Gtk
 from gi.repository import Pango
-from gi.repository import GObject
 
 from src import encoding
 from src import image
@@ -16,6 +16,8 @@ from src.preferences import prefs
 
 _main_filechooser_dialog = None
 _library_filechooser_dialog = None
+
+PANGO_SCALE_SMALL = 0.8333333333333
 
 
 class _ComicFileChooserDialog(Gtk.Dialog):
@@ -45,9 +47,10 @@ class _ComicFileChooserDialog(Gtk.Dialog):
             buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                        Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
 
-        GObject.GObject.__init__(self, title, None, 0, buttons)
+        # GObject.GObject.__init__(self, title, None, 0, buttons)  # TODO GObject.__init__ no longer takes arguments
+        GObject.GObject.__init__(self)
         self.set_default_response(Gtk.ResponseType.OK)
-        self.set_has_separator(False)
+        # self.set_has_separator(False)
 
         self.filechooser = Gtk.FileChooserWidget(action=action)
         self.filechooser.set_size_request(680, 420)
@@ -62,15 +65,15 @@ class _ComicFileChooserDialog(Gtk.Dialog):
         preview_box.set_size_request(130, 0)
         self._preview_image = Gtk.Image()
         self._preview_image.set_size_request(130, 130)
-        preview_box.pack_start(self._preview_image, False, False)
+        preview_box.pack_start(self._preview_image, False, False, 0)
         self.filechooser.set_preview_widget(preview_box)
         self._namelabel = labels.FormattedLabel(weight=Pango.Weight.BOLD,
-                                                scale=Pango.SCALE_SMALL)
+                                                scale=PANGO_SCALE_SMALL)
         self._namelabel.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
-        preview_box.pack_start(self._namelabel, False, False)
-        self._sizelabel = labels.FormattedLabel(scale=Pango.SCALE_SMALL)
+        preview_box.pack_start(self._namelabel, False, False, 0)
+        self._sizelabel = labels.FormattedLabel(scale=PANGO_SCALE_SMALL)
         self._sizelabel.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
-        preview_box.pack_start(self._sizelabel, False, False)
+        preview_box.pack_start(self._sizelabel, False, False, 0)
         self.filechooser.set_use_preview_label(False)
         preview_box.show_all()
         self.filechooser.connect('update-preview', self._update_preview)
