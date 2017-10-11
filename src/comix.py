@@ -105,6 +105,7 @@ def run():
         opts, args = getopt.gnu_getopt(sys.argv[1:], 'fhla',
                                        ['fullscreen', 'help', 'library', 'animate-gifs'])
     except getopt.GetoptError:
+        opts = args = []
         print_help()
     for opt, value in opts:
         if opt in ('-h', '--help'):

@@ -250,7 +250,7 @@ class FileHandler(object):
         if self.file_loaded:
             self.close_file()
         while Gtk.events_pending():
-            Gtk.main_iteration(False)
+            Gtk.main_iteration()
 
         unknown_files = []
         # If <path> is an archive we create an Extractor for it and set the
@@ -354,10 +354,10 @@ class FileHandler(object):
 
         depth = self._window.is_double_page and 2 or 1
         priority_ordering = (
-            range(self._current_image_index,
-                  self._current_image_index + depth * 2) +
-            range(self._current_image_index - depth,
-                  self._current_image_index)[::-1])
+            list(range(self._current_image_index,
+                  self._current_image_index + depth * 2)) +
+            list(range(self._current_image_index - depth,
+                  self._current_image_index))[::-1])
         priority_ordering = [lst[p] for p in priority_ordering
                              if 0 <= p <= self.get_number_of_pages() - 1]
         for i, name in enumerate(priority_ordering):

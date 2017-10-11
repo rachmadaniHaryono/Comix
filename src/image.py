@@ -175,12 +175,12 @@ def add_border(pixbuf, thickness, colour=0x000000FF):
     """Return a pixbuf from <pixbuf> with a <thickness> px border of
     <colour> added.
     """
-    canvas = GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB, True, 8,
-                              pixbuf.get_width() + thickness * 2,
-                              pixbuf.get_height() + thickness * 2)
+    return pixbuf
+    # TODO Not currently functional and causes a GTK crash.  Need to look into more
+    # canvas = GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB, True, 8, pixbuf.get_width() + thickness * 2, pixbuf.get_height() + thickness * 2)  # TODO GObject.__init__ no longer takes arguments
+    canvas = GdkPixbuf.Pixbuf()
     canvas.fill(colour)
-    pixbuf.copy_area(0, 0, pixbuf.get_width(), pixbuf.get_height(),
-                     canvas, thickness, thickness)
+    pixbuf.copy_area(0, 0, pixbuf.get_width(), pixbuf.get_height(), canvas, thickness, thickness)
     return canvas
 
 

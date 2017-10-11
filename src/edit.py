@@ -179,8 +179,7 @@ class _ImageArea(Gtk.ScrolledWindow):
     def fetch_images(self):
         """Load all the images in the archive or directory."""
         for page in range(1, self._edit_dialog.file_handler.get_number_of_pages() + 1):
-            thumb = self._edit_dialog.file_handler.get_thumbnail(
-                    page, 67, 100, create=False)
+            thumb = self._edit_dialog.file_handler.get_thumbnail(page, 67, 100, create=False)
             thumb = image.add_border(thumb, 1, 0x555555FF)
             path = self._edit_dialog.file_handler.get_path_to_page(page)
             self._liststore.append([thumb,

@@ -32,8 +32,7 @@ class MainWindow(Gtk.Window):
     program when closed.
     """
 
-    def __init__(self, animate_gifs=False, fullscreen=False, show_library=False, open_path=None,
-                 open_page=1):
+    def __init__(self, animate_gifs=False, fullscreen=False, show_library=False, open_path=None, open_page=1):
         GObject.GObject.__init__(self)
 
         # ----------------------------------------------------------------
@@ -82,8 +81,7 @@ class MainWindow(Gtk.Window):
 
         # This is a hack to get the focus away from the toolbar so that
         # we don't activate it with space or some other key (alternative?)
-        self.toolbar.set_focus_child(
-                self.ui_manager.get_widget('/Tool/expander'))
+        self.toolbar.set_focus_child(self.ui_manager.get_widget('/Tool/expander'))
         self.toolbar.set_style(Gtk.ToolbarStyle.ICONS)
         self.toolbar.set_icon_size(Gtk.IconSize.LARGE_TOOLBAR)
 
@@ -371,7 +369,7 @@ class MainWindow(Gtk.Window):
                 bg_colour = image.get_most_common_edge_colour(pixbuf)
                 self.set_bg_colour(bg_colour)
 
-        self._image_box.window.freeze_updates()
+        # self._image_box.window.freeze_updates()
         self._main_layout.move(self._image_box, max(0, x_padding),
                                max(0, y_padding))
         self.left_image.show()
@@ -379,19 +377,19 @@ class MainWindow(Gtk.Window):
             self.right_image.show()
         else:
             self.right_image.hide()
-        self._main_layout.set_size(*self._image_box.size_request())
+        self._main_layout.set_size(self._image_box.size_request().height, self._image_box.size_request().width)
         if scroll:
             if at_bottom:
                 self.scroll_to_fixed(horiz='endsecond', vert='bottom')
             else:
                 self.scroll_to_fixed(horiz='startfirst', vert='top')
-        self._image_box.window.thaw_updates()
+        # self._image_box.window.thaw_updates()
 
         self.statusbar.set_root(self.file_handler.get_base_filename())
         self.statusbar.update()
         self.update_title()
         while Gtk.events_pending():
-            Gtk.main_iteration(False)
+            Gtk.main_iteration()
         enhance.draw_histogram(self.left_image)
         self.file_handler.do_cacheing()
         self.thumbnailsidebar.load_thumbnails()
@@ -544,8 +542,8 @@ class MainWindow(Gtk.Window):
         old_hadjust = self._hadjust.get_value()
         old_vadjust = self._vadjust.get_value()
         visible_width, visible_height = self.get_visible_area_size()
-        hadjust_upper = max(0, self._hadjust.upper - visible_width)
-        vadjust_upper = max(0, self._vadjust.upper - visible_height)
+        hadjust_upper = max(0, self._hadjust.get_upper() - visible_width)
+        vadjust_upper = max(0, self._vadjust.get_upper() - visible_height)
         hadjust_lower = 0
         if bound is not None and self.is_manga_mode:
             bound = {'first': 'second', 'second': 'first'}[bound]
@@ -592,8 +590,8 @@ class MainWindow(Gtk.Window):
         new_vadjust = old_vadjust
         new_hadjust = old_hadjust
         visible_width, visible_height = self.get_visible_area_size()
-        vadjust_upper = self._vadjust.upper - visible_height
-        hadjust_upper = self._hadjust.upper - visible_width
+        vadjust_upper = self._vadjust.get_upper() - visible_height
+        hadjust_upper = self._hadjust.get_upper() - visible_width
 
         if vert == 'top':
             new_vadjust = 0
@@ -657,7 +655,7 @@ class MainWindow(Gtk.Window):
             return True
         width, height = self.get_visible_area_size()
         if self.is_manga_mode:
-            return (self._hadjust.get_value() >= self._hadjust.upper - width or
+            return (self._hadjust.get_value() >= self._hadjust.get_upper() - width or
                     self._hadjust.get_value() > self.left_image.size_request()[0])
         else:
             return (self._hadjust.get_value() == 0 or
@@ -687,13 +685,13 @@ class MainWindow(Gtk.Window):
         width, height = self.get_size()
         if not prefs['hide all'] and not (self.is_fullscreen and prefs['hide all in fullscreen']):
             if prefs['show toolbar']:
-                height -= self.toolbar.size_request()[1]
+                height -= self.toolbar.size_request().height
             if prefs['show statusbar']:
-                height -= self.statusbar.size_request()[1]
+                height -= self.statusbar.size_request().height
             if prefs['show thumbnails']:
                 width -= self.thumbnailsidebar.get_width()
             if prefs['show menubar']:
-                height -= self.menubar.size_request()[1]
+                height -= self.menubar.size_request().height
             if prefs['show scrollbar']:
                 if self.zoom_mode == preferences.ZOOM_MODE_WIDTH:
                     width -= self._vscroll.size_request()[0]
@@ -718,7 +716,7 @@ class MainWindow(Gtk.Window):
         probably use the cursor_handler instead of using this method
         directly.
         """
-        self._main_layout.window.set_cursor(mode)
+        # self._main_layout.window.set_cursor(mode)
         return False
 
     def update_title(self):
