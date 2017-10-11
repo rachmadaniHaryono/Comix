@@ -902,11 +902,11 @@ class _AddBooksProgressDialog(Gtk.Dialog):
         """Adds the books at <paths> to the library, and also to the
         <collection>, unless it is None.
         """
-        GObject.GObject.__init__(self, _('Adding books'), library,
-                                 Gtk.DialogFlags.MODAL, (Gtk.STOCK_STOP, Gtk.ResponseType.CLOSE))
+        # GObject.GObject.__init__(self, _('Adding books'), library, Gtk.DialogFlags.MODAL, (Gtk.STOCK_STOP, Gtk.ResponseType.CLOSE)) # TODO GObject.__init__ no longer takes arguments
+        GObject.GObject.__init__(self)
         self._destroy = False
         self.set_size_request(400, -1)
-        self.set_has_separator(False)
+        # self.set_has_separator(False)        # TODO Removed in GTK3
         self.set_resizable(False)
         self.set_border_width(4)
         self.connect('response', self._response)

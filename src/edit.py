@@ -6,6 +6,8 @@ import os
 import tempfile
 
 from gi.repository import GObject
+from gi.repository import Gdk
+from gi.repository import GdkPixbuf
 from gi.repository import Gtk
 
 from src import archive
@@ -31,8 +33,9 @@ class _EditArchiveDialog(Gtk.Dialog):
     """
 
     def __init__(self, window):
-        GObject.GObject.__init__(self, _('Edit archive'), window, Gtk.DialogFlags.MODAL,
-                            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
+        # GObject.GObject.__init__(self, _('Edit archive'), window, Gtk.DialogFlags.MODAL, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)) # TODO GObject.__init__ no longer takes arguments
+        GObject.GObject.__init__(self)
+
         self.kill = False  # Dialog is killed.
         self.file_handler = window.file_handler
         self._window = window
@@ -42,7 +45,7 @@ class _EditArchiveDialog(Gtk.Dialog):
         self._import_button = self.add_button(_('Import'), Gtk.ResponseType.HELP)
         self._import_button.set_image(Gtk.Image.new_from_stock(Gtk.STOCK_ADD,
                                                                Gtk.IconSize.BUTTON))
-        self.set_has_separator(False)
+        # self.set_has_separator(False)         # TODO Removed in GTK3
         self.set_border_width(4)
         self.resize(min(Gdk.Screen.get_default().get_width() - 50, 750),
                     min(Gdk.Screen.get_default().get_height() - 50, 600))
@@ -239,7 +242,7 @@ class _ImageArea(Gtk.ScrolledWindow):
         # context.set_icon_pixmap() seems to cause crashes, so we do a
         # quick and dirty conversion to pixbuf.
         pointer = GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB, True, 8,
-                                 *pixmap.get_size())
+                                   *pixmap.get_size())
         pointer = pointer.get_from_drawable(pixmap, iconview.get_colormap(),
                                             0, 0, 0, 0, *pixmap.get_size())
         context.set_icon_pixbuf(pointer, -5, -5)
@@ -256,8 +259,8 @@ class _OtherArea(Gtk.VBox):
         scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         self.pack_start(scrolled, True, True, 0)
         info = Gtk.Label(label=_('Please note that the only files that are '
-                           'automatically added to this list are those '
-                           'files in archives that Comix recognizes as comments.'))
+                                 'automatically added to this list are those '
+                                 'files in archives that Comix recognizes as comments.'))
         info.set_alignment(0.5, 0.5)
         info.set_line_wrap(True)
         self.pack_start(info, False, False, 10)

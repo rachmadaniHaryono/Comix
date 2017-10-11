@@ -11,8 +11,7 @@ class FormattedLabel(Gtk.Label):
     style and scale, even when new text is set using set_text().
     """
 
-    def __init__(self, text='', weight=Pango.Weight.NORMAL,
-                 style=Pango.Style.NORMAL, scale=1.0):
+    def __init__(self, text='', weight=Pango.Weight.NORMAL, style=Pango.Style.NORMAL, scale=1.0):
         # GObject.GObject.__init__(self, text) # TODO GObject.__init__ no longer takes arguments
         GObject.GObject.__init__(self)
         self._weight = weight

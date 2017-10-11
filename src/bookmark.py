@@ -8,6 +8,7 @@ import os
 from gi.repository import GObject
 from gi.repository import GdkPixbuf
 from gi.repository import Gtk
+from gi.repository import Gdk
 
 from src import constants
 
@@ -109,7 +110,8 @@ class _Bookmark(Gtk.ImageMenuItem):
         self._archive_type = archive_type
         self._file_handler = file_handler
 
-        GObject.GObject.__init__(self, str(self), False)
+        # GObject.GObject.__init__(self, str(self), False)  # TODO GObject.__init__ no longer takes arguments
+        GObject.GObject.__init__(self)
         if self._archive_type is not None:
             im = Gtk.Image.new_from_stock('comix-archive', Gtk.IconSize.MENU)
         else:

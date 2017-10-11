@@ -5,7 +5,8 @@ from __future__ import absolute_import
 import cPickle
 import os
 
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk
+from gi.repository import Gdk
 from gi.repository import GObject
 
 from src import constants

@@ -5,7 +5,8 @@ from __future__ import absolute_import
 import os
 import sys
 
-from gi.repository import Gtk,GdkPixbuf
+from gi.repository import GdkPixbuf
+from gi.repository import Gtk
 
 
 def load_icons():

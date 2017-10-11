@@ -2,7 +2,8 @@
 """status.py - Statusbar for main window."""
 from __future__ import absolute_import
 
-from gi.repository import Gtk, GObject
+from gi.repository import GObject
+from gi.repository import Gtk
 
 from src import encoding
 

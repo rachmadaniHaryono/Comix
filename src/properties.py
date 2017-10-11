@@ -95,11 +95,11 @@ class _PropertiesDialog(Gtk.Dialog):
 
     def __init__(self, window):
 
-        GObject.GObject.__init__(self, _('Properties'), window, 0,
-                                 (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE))
+        # GObject.GObject.__init__(self, _('Properties'), window, 0, (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)) # TODO GObject.__init__ no longer takes arguments
+        GObject.GObject.__init__(self)
 
         self.set_resizable(False)
-        self.set_has_separator(False)
+        # self.set_has_separator(False)         # TODO Removed in GTK3
         self.connect('response', _close_dialog)
         self.set_default_response(Gtk.ResponseType.CLOSE)
         notebook = Gtk.Notebook()

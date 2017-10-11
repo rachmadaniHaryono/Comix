@@ -4,7 +4,8 @@ from __future__ import absolute_import
 
 import urllib
 
-from gi.repository import Gtk, GObject
+from gi.repository import GObject
+from gi.repository import Gtk
 
 from src import preferences
 

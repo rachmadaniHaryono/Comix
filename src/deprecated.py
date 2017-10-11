@@ -5,7 +5,7 @@ from __future__ import absolute_import
 import os
 import shutil
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GObject
 
 from src import constants
 
@@ -13,9 +13,8 @@ from src import constants
 class _CleanerDialog(Gtk.MessageDialog):
 
     def __init__(self, window, paths):
-        GObject.GObject.__init__(self, window, 0, Gtk.MessageType.QUESTION,
-                                   Gtk.ButtonsType.YES_NO,
-                                   _('There are deprecated files left on your computer.'))
+        # GObject.GObject.__init__(self, window, 0, Gtk.MessageType.QUESTION, Gtk.ButtonsType.YES_NO, _('There are deprecated files left on your computer.'))   # TODO GObject.__init__ no longer takes arguments
+        GObject.GObject.__init__()
 
         self._paths = paths
         self.connect('response', self._response)
@@ -50,11 +49,9 @@ def move_files_to_xdg_dirs():
         ('library.db', constants.DATA_DIR),
         ('library_covers', constants.DATA_DIR))
     for name, new_dir in to_be_moved:
-        if os.path.exists(os.path.join(old_dir, name)) and not os.path.exists(
-                os.path.join(new_dir, name)):
+        if os.path.exists(os.path.join(old_dir, name)) and not os.path.exists(os.path.join(new_dir, name)):
             try:
-                os.rename(os.path.join(old_dir, name),
-                          os.path.join(new_dir, name))
+                os.rename(os.path.join(old_dir, name), os.path.join(new_dir, name))
             except Exception:
                 pass
 

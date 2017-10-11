@@ -6,7 +6,8 @@ given it's own file for the sake of readability.
 """
 from __future__ import absolute_import
 
-from gi.repository import GObject, Gtk
+from gi.repository import GObject
+from gi.repository import Gtk
 
 from src import about
 from src import bookmark
@@ -320,7 +321,7 @@ class MainUI(Gtk.UIManager):
                    'previous_page',
                    'first_page',
                    'last_page')
-        comment = ('comments',)
+        comment_ = ('comments',)
         general_sensitive = False
         comment_sensitive = False
 
@@ -330,6 +331,6 @@ class MainUI(Gtk.UIManager):
                 comment_sensitive = True
         for name in general:
             self._actiongroup.get_action(name).set_sensitive(general_sensitive)
-        for name in comment:
+        for name in comment_:
             self._actiongroup.get_action(name).set_sensitive(comment_sensitive)
         self.bookmarks.set_sensitive(general_sensitive)
