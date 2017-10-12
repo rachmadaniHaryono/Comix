@@ -1,6 +1,6 @@
 # coding=utf-8
 """lens.py - Magnifying glass."""
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 import math
 

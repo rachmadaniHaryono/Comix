@@ -1,6 +1,6 @@
 # coding=utf-8
 """histogram.py - Draw histograms (RGB) from pixbufs."""
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 from PIL import Image
 from PIL import ImageDraw

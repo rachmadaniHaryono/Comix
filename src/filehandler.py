@@ -1,6 +1,6 @@
 # coding=utf-8
 """filehandler.py - File handler."""
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 import gc
 import os

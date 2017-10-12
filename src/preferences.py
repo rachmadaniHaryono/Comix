@@ -1,6 +1,6 @@
 # coding=utf-8
 """preferences.py - Preference handler."""
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 import pickle
 import os

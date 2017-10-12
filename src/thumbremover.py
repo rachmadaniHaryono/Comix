@@ -2,7 +2,7 @@
 """thumbremover.py - Thumbnail maintenance module for Comix.
 Removes and cleans up outdated and orphaned thumbnails.
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 import os
 try:

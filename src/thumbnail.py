@@ -4,7 +4,7 @@ freedesktop.org "standard" at http://jens.triq.net/thumbnail-spec/
 
 Only normal size (i.e. 128x128 px) thumbnails are supported.
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 import os
 import re
