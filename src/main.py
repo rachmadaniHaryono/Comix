@@ -694,12 +694,12 @@ class MainWindow(Gtk.Window):
                 height -= self.menubar.size_request().height
             if prefs['show scrollbar']:
                 if self.zoom_mode == preferences.ZOOM_MODE_WIDTH:
-                    width -= self._vscroll.size_request()[0]
+                    width -= self._vscroll.size_request().width
                 elif self.zoom_mode == preferences.ZOOM_MODE_HEIGHT:
-                    height -= self._hscroll.size_request()[1]
+                    height -= self._hscroll.size_request().height
                 elif self.zoom_mode == preferences.ZOOM_MODE_MANUAL:
-                    width -= self._vscroll.size_request()[0]
-                    height -= self._hscroll.size_request()[1]
+                    width -= self._vscroll.size_request().width
+                    height -= self._hscroll.size_request().height
         return width, height
 
     def get_layout_pointer_position(self):

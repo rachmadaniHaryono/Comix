@@ -33,8 +33,8 @@ class MagnifyingGlass(object):
         if not self._window.file_handler.file_loaded:
             return
         pixbuf = self._get_lens_pixbuf(x, y)
-        cursor = Gdk.Cursor.new(Gdk.Display.get_default(), pixbuf,
-                                prefs['lens size'] // 2, prefs['lens size'] // 2)
+        cursor = Gdk.Cursor.new_for_display(Gdk.Display.get_default(), Gdk.CursorType.ARROW)
+        # Gdk.Display.get_default(), pixbuf, prefs['lens size'] // 2, prefs['lens size'] // 2
         self._window.cursor_handler.set_cursor_type(cursor)
 
     def toggle(self, action):
@@ -49,8 +49,8 @@ class MagnifyingGlass(object):
         """Get a pixbuf containing the appropiate image data for the lens
         where <x> and <y> are the positions of the cursor.
         """
-        canvas = GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB, True, 8,
-                                prefs['lens size'], prefs['lens size'])
+        # canvas = GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB, True, 8, prefs['lens size'], prefs['lens size']) # TODO GObject.__init__ no longer takes arguments
+        canvas = GdkPixbuf.Pixbuf()
         canvas.fill(0x000000bb)
         if self._window.displayed_double():
             if self._window.is_manga_mode:
@@ -88,13 +88,12 @@ class MagnifyingGlass(object):
         """
         area_x, area_y = self._window.get_visible_area_size()
         if left:
-            padding_x = max(0,
-                            (area_x - other_image_width - image_size[0]) // 2)
+            padding_x = max(0, (area_x - other_image_width - image_size.width) // 2)
         else:
             padding_x = \
-                (max(0, (area_x - other_image_width - image_size[0]) // 2) +
+                (max(0, (area_x - other_image_width - image_size.width) // 2) +
                  other_image_width + 2)
-        padding_y = max(0, (area_y - image_size[1]) // 2)
+        padding_y = max(0, (area_y - image_size.height) // 2)
         x -= padding_x
         y -= padding_y
         rotation = prefs['rotation']
@@ -103,9 +102,9 @@ class MagnifyingGlass(object):
             rotation = rotation % 360
 
         if rotation in [90, 270]:
-            scale = float(source_pixbuf.get_height()) / image_size[0]
+            scale = float(source_pixbuf.get_height()) / image_size.width
         else:
-            scale = float(source_pixbuf.get_width()) / image_size[0]
+            scale = float(source_pixbuf.get_width()) / image_size.width
         x *= scale
         y *= scale
         source_mag = prefs['lens magnification'] / scale
@@ -147,22 +146,17 @@ class MagnifyingGlass(object):
         if width < 1 or height < 1:
             return
 
-        subpixbuf = source_pixbuf.subpixbuf(int(src_x), int(src_y),
-                                            int(width), int(height))
-        subpixbuf = subpixbuf.scale_simple(
-                int(math.ceil(source_mag * subpixbuf.get_width())),
-                int(math.ceil(source_mag * subpixbuf.get_height())),
-                GdkPixbuf.InterpType.TILES)
+        subpixbuf = source_pixbuf.new_subpixbuf(int(src_x), int(src_y), int(width), int(height))
+        subpixbuf = subpixbuf.scale_simple(int(math.ceil(source_mag * subpixbuf.get_width())),
+                                           int(math.ceil(source_mag * subpixbuf.get_height())),
+                                           GdkPixbuf.InterpType.TILES)
 
         if rotation == 90:
-            subpixbuf = subpixbuf.rotate_simple(
-                    Gdk.PIXBUF_ROTATE_CLOCKWISE)
+            subpixbuf = subpixbuf.rotate_simple(Gdk.PIXBUF_ROTATE_CLOCKWISE)
         elif rotation == 180:
-            subpixbuf = subpixbuf.rotate_simple(
-                    Gdk.PIXBUF_ROTATE_UPSIDEDOWN)
+            subpixbuf = subpixbuf.rotate_simple(Gdk.PIXBUF_ROTATE_UPSIDEDOWN)
         elif rotation == 270:
-            subpixbuf = subpixbuf.rotate_simple(
-                    Gdk.PIXBUF_ROTATE_COUNTERCLOCKWISE)
+            subpixbuf = subpixbuf.rotate_simple(Gdk.PIXBUF_ROTATE_COUNTERCLOCKWISE)
         if prefs['horizontal flip']:
             subpixbuf = subpixbuf.flip(horizontal=True)
         if prefs['vertical flip']:
