@@ -12,12 +12,16 @@ def to_unicode(string):
     encoding, and then fall back on some common encodings. If none
     of the convertions are successful, "???" is returned.
     """
-    if isinstance(string, unicode):
+    try:
+
+        if isinstance(string, unicode):
+            return string
+        for encoding in (_filesystemencoding, 'utf-8', 'latin-1'):
+            try:
+                ustring = unicode(string, encoding)
+                return ustring
+            except (UnicodeError, LookupError):
+                pass
+        return u'???'
+    except NameError:
         return string
-    for encoding in (_filesystemencoding, 'utf-8', 'latin-1'):
-        try:
-            ustring = unicode(string, encoding)
-            return ustring
-        except (UnicodeError, LookupError):
-            pass
-    return u'???'

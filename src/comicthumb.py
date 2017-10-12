@@ -19,6 +19,7 @@ from __future__ import absolute_import
 import sys
 
 try:
+    # noinspection PyUnresolvedReferences
     from PIL import Image
 except ImportError:
     print('! Could not import the Image module (PIL).')

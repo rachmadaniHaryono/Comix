@@ -2,7 +2,11 @@
 """thumbbar.py - Thumbnail sidebar for main window."""
 from __future__ import absolute_import
 
-import urllib
+try:
+    from urllib import pathname2url  # Py2
+except ImportError:
+    from urllib.request import pathname2url  # Py3
+
 
 from PIL import Image
 from PIL import ImageDraw
@@ -16,6 +20,7 @@ from src.preferences import prefs
 
 # Compatibility
 try:
+    # noinspection PyUnresolvedReferences
     range = xrange  # Python2
 except NameError:
     pass
@@ -167,7 +172,7 @@ class ThumbnailSidebar(Gtk.HBox):
         try:
             selected = self._get_selected_row()
             path = self._window.file_handler.get_path_to_page(selected + 1)
-            uri = 'file://localhost' + urllib.pathname2url(path)
+            uri = 'file://localhost' + pathname2url(path)
             selection.set_uris([uri])
         except Exception:
             pass

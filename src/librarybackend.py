@@ -153,7 +153,7 @@ class LibraryBackend(object):
         name = cur.fetchone()
         if name is None:
             return None
-        return unicode(name)
+        return str(name)
 
     def get_collection_by_name(self, name):
         """Return the collection called <name>, or None if no such

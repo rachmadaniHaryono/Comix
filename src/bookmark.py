@@ -2,7 +2,7 @@
 """bookmark.py - Bookmarks handler (including menu and dialog)."""
 from __future__ import absolute_import
 
-import cPickle
+import pickle
 import os
 
 from gi.repository import GObject
@@ -159,8 +159,8 @@ class _BookmarksStore(object):
         if os.path.isfile(_pickle_path):
             try:
                 fd = open(_pickle_path, 'rb')
-                version = cPickle.load(fd)
-                packs = cPickle.load(fd)
+                version = pickle.load(fd)
+                packs = pickle.load(fd)
                 for pack in packs:
                     self.add_bookmark_by_values(*pack)
                 fd.close()
@@ -216,9 +216,9 @@ class _BookmarksStore(object):
     def write_bookmarks_file(self):
         """Store relevant bookmark info in the comix directory."""
         fd = open(_pickle_path, 'wb')
-        cPickle.dump(constants.VERSION, fd, cPickle.HIGHEST_PROTOCOL)
+        pickle.dump(constants.VERSION, fd, pickle.HIGHEST_PROTOCOL)
         packs = [bookmark.pack() for bookmark in self._bookmarks]
-        cPickle.dump(packs, fd, cPickle.HIGHEST_PROTOCOL)
+        pickle.dump(packs, fd, pickle.HIGHEST_PROTOCOL)
         fd.close()
 
 

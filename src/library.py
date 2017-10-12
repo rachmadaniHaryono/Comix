@@ -4,7 +4,10 @@ from __future__ import absolute_import
 
 import gc
 import os
-import urllib
+try:
+    from urllib import url2pathname  # Py2
+except ImportError:
+    from urllib.request import url2pathname  # Py3
 from xml.sax.saxutils import escape as xmlescape
 
 from PIL import Image
@@ -716,7 +719,7 @@ class _BookArea(Gtk.ScrolledWindow):
                 uri = uri[7:]
             elif uri.startswith('file:/'):  # Xffm etc.
                 uri = uri[5:]
-            path = urllib.url2pathname(uri)
+            path = url2pathname(uri)
             paths.append(path)
         collection = self._library.collection_area.get_current_collection()
         collection_name = self._library.backend.get_collection_name(collection)

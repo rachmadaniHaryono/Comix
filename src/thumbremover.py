@@ -5,7 +5,10 @@ Removes and cleans up outdated and orphaned thumbnails.
 from __future__ import absolute_import
 
 import os
-import urllib
+try:
+    from urllib import url2pathname  # Py2
+except ImportError:
+    from urllib.request import url2pathname  # Py3
 
 from PIL import Image
 from gi.repository import GObject
@@ -232,9 +235,9 @@ def _uri_to_path(uri):
     identifier intact.
     """
     if uri.startswith('file://'):
-        return urllib.url2pathname(uri[7:])
+        return url2pathname(uri[7:])
     else:
-        return urllib.url2pathname(uri)
+        return url2pathname(uri)
 
 
 def open_dialog(action, window):

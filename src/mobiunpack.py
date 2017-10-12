@@ -11,6 +11,7 @@ import struct
 
 # Compatibility
 try:
+    # noinspection PyUnresolvedReferences
     range = xrange  # Python2
 except NameError:
     pass

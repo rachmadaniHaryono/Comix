@@ -6,7 +6,10 @@ given its own file for the sake of readability.
 """
 from __future__ import absolute_import
 
-import urllib
+try:
+    from urllib import url2pathname  # Py2
+except ImportError:
+    from urllib.request import url2pathname  # Py3
 
 from gi.repository import Gdk
 
@@ -217,7 +220,8 @@ class EventHandler(object):
                          Gdk.KEY_KP_Down, Gdk.KEY_KP_Home, Gdk.KEY_KP_End,
                          Gdk.KEY_KP_Page_Up, Gdk.KEY_KP_Page_Down)
 
-        if event.keyval in _ignored_keys or (event.keyval == Gdk.KEY_Return and 'GDK_MOD1_MASK' not in event.get_state().value_names):
+        if event.keyval in _ignored_keys or (
+                event.keyval == Gdk.KEY_Return and 'GDK_MOD1_MASK' not in event.get_state().value_names):
             self._window.emit_stop_by_name('key_press_event')
             return True
 
@@ -335,7 +339,7 @@ class EventHandler(object):
             uri = uri[7:]
         elif uri.startswith('file:/'):  # Xffm etc.
             uri = uri[5:]
-        path = urllib.url2pathname(uri)
+        path = url2pathname(uri)
         self._window.file_handler.open_file(path)
 
     def _scroll_with_flipping(self, x, y):

@@ -22,6 +22,7 @@ from src.preferences import prefs
 
 # Compatibility
 try:
+    # noinspection PyUnresolvedReferences
     range = xrange  # Python2
 except NameError:
     pass
@@ -260,12 +261,11 @@ class FileHandler(object):
             self._base_path = path
             self._condition = self._extractor.setup(path, self._tmp_dir)
             files = self._extractor.get_files()
-            image_files = filter(self._image_re.search, files)
+            image_files = [f for f in files if self._image_re.search(f)]
             alphanumeric_sort(image_files)
-            comment_files = filter(self._comment_re.search, files)
+            comment_files = [f for f in files if self._comment_re.search(f)]
             # Allow managing sub-archives
-            unknown_files = \
-                filter(lambda i: i not in image_files + comment_files, files)
+            unknown_files = [f for f in files if f not in image_files + comment_files]
             self._image_files = \
                 [os.path.join(self._tmp_dir, f) for f in image_files]
             self._comment_files = \
@@ -317,10 +317,8 @@ class FileHandler(object):
                     dst = self._tmp_dir + dst
                     shutil.move(filename, dst)
                     self._image_files.append(dst)
-                self._comment_files = \
-                    filter(self._comment_re.search, self._image_files)
-                self._image_files = \
-                    filter(self._image_re.search, self._image_files)
+                self._comment_files = [f for f in self._image_files if self._comment_re.search(f)]
+                self._image_files = [f for f in self._image_files if self._image_re.search(f)]
                 alphanumeric_sort(self._image_files)
                 self._name_table.clear()
                 for full_path in self._image_files + self._comment_files:
@@ -674,7 +672,7 @@ def alphanumeric_sort(filenames):
         return s.lower()
 
     rec = re.compile("\d+|\D+")
-    filenames.sort(key=lambda s: map(_format_substring, rec.findall(s)))
+    filenames.sort(key=lambda s: [_format_substring(i) for i in rec.findall(s)])
 
 
 def list_dir_sorted(dir_name):

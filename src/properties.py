@@ -16,6 +16,7 @@ from src import image
 from src import labels
 
 try:
+    # noinspection PyUnresolvedReferences
     import pwd
 except ImportError:
     # Running on non-Unix machine.
@@ -124,9 +125,10 @@ class _PropertiesDialog(Gtk.Dialog):
                     archive.get_name(window.file_handler.archive_type),
                     '{:.1f} MiB'.format(stats.st_size / 1048576.0))
                 page.set_main_info(main_info)
+
                 try:
                     uid = pwd.getpwuid(stats.st_uid)[0]
-                except Exception:
+                except NameError:
                     uid = str(stats.st_uid)
                 secondary_info = (
                     (_('Location'), encoding.to_unicode(os.path.dirname(
@@ -161,7 +163,7 @@ class _PropertiesDialog(Gtk.Dialog):
             page.set_main_info(main_info)
             try:
                 uid = pwd.getpwuid(stats.st_uid)[0]
-            except Exception:
+            except NameError:
                 uid = str(stats.st_uid)
             secondary_info = (
                 (_('Location'), encoding.to_unicode(os.path.dirname(path))),

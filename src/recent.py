@@ -2,7 +2,10 @@
 """recent.py - Recent files handler."""
 from __future__ import absolute_import
 
-import urllib
+try:
+    from urllib import url2pathname, pathname2url  # Py2
+except ImportError:
+    from urllib.request import url2pathname, pathname2url  # Py3
 
 from gi.repository import GObject
 from gi.repository import Gtk
@@ -38,11 +41,11 @@ class RecentFilesMenu(Gtk.RecentChooserMenu):
 
     def _load(self, *args):
         uri = self.get_current_uri()
-        path = urllib.url2pathname(uri[7:])
+        path = url2pathname(uri[7:])
         self._window.file_handler.open_file(path)
 
     def add(self, path):
         if not preferences.prefs['store recent file info']:
             return
-        uri = 'file://' + urllib.pathname2url(path)
+        uri = 'file://' + pathname2url(path)
         self._manager.add_item(uri)

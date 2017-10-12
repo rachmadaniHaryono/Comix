@@ -2,13 +2,13 @@
 """archive.py - Archive handling (extract/create) for Comix."""
 from __future__ import absolute_import
 
-import cStringIO
 import os
 import re
 import sys
 import tarfile
 import threading
 import zipfile
+from io import StringIO
 
 from gi.repository import Gtk
 
@@ -351,25 +351,25 @@ class Extractor(object):
         """
 
         if os.path.exists(os.path.join(self._dst, chosen)):
-            cStringIO.StringIO(open(os.path.join(self._dst, chosen), 'rb').read())
+            StringIO(open(os.path.join(self._dst, chosen), 'rb').read())
 
         if self._type == ZIP:
-            return cStringIO.StringIO(self._zfile.read(chosen))
+            return StringIO(self._zfile.read(chosen))
         elif self._type in [TAR, GZIP, BZIP2]:
-            return cStringIO.StringIO(self._tfile.extractfile(chosen).read())
+            return StringIO(self._tfile.extractfile(chosen).read())
         elif self._type == RAR:
             proc = process.Process([_rar_exec, 'p', '-inul', '-p-', '--',
                                     self._src, chosen])
             fobj = proc.spawn()
-            return cStringIO.StringIO(fobj.read())
+            return StringIO(fobj.read())
         elif self._type == SEVENZIP:
             if Archive7z is not None:
-                return cStringIO.StringIO(self._szfile.getmember(chosen).read())
+                return StringIO(self._szfile.getmember(chosen).read())
             elif _7z_exec is not None:
                 proc = process.Process([_7z_exec, 'e', '-bd', '-p-', '-so',
                                         self._src, chosen])
                 fobj = proc.spawn()
-                return cStringIO.StringIO(fobj.read())
+                return StringIO(fobj.read())
 
 
 class Packer(object):
@@ -508,7 +508,7 @@ def get_archive_info(path):
         return None
     files = extractor.get_files()
     extractor.close()
-    num_pages = len(filter(image_re.search, files))
+    num_pages = len([f for f in files if image_re.search(f)])
     size = os.stat(path).st_size
     return mime, num_pages, size
 

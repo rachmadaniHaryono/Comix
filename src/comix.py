@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-from __future__ import print_function
+from __future__ import absolute_import, print_function
 
 """Comix - GTK Comic Book Viewer
 
@@ -23,7 +23,6 @@ Copyright (C) 2005-2009 Pontus Ekberg
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # -------------------------------------------------------------------------
-from __future__ import absolute_import
 
 import getopt
 import gettext
@@ -31,12 +30,15 @@ import os
 import signal
 import sys
 
-# Check for PyGTK and PIL dependencies.
+# Check for PyGobject and Pillow dependencies.
 try:
+    # noinspection PyUnresolvedReferences
     import gi
 
     gi.require_version('Gtk', '3.0')
+    # noinspection PyUnresolvedReferences
     from gi.repository import Gtk
+    # noinspection PyUnresolvedReferences
     from gi.repository import GObject
 
     GObject.threads_init()
@@ -51,6 +53,7 @@ except ImportError:
     sys.exit(1)
 
 try:
+    # noinspection PyUnresolvedReferences
     from PIL import Image
 except ImportError:
     print('Python Imaging Library (PIL) version 1.1.5 or higher or Pillow is required.')
@@ -90,11 +93,9 @@ def run():
     exec_path = os.path.abspath(sys.argv[0])
     base_dir = os.path.dirname(os.path.dirname(exec_path))
     if os.path.isdir(os.path.join(base_dir, 'messages')):
-        gettext.install('comix', os.path.join(base_dir, 'messages'),
-                        unicode=True)
+        gettext.install('comix', os.path.join(base_dir, 'messages'))
     else:
-        gettext.install('comix', os.path.join(base_dir, 'share/locale'),
-                        unicode=True)
+        gettext.install('comix', os.path.join(base_dir, 'share/locale'))
 
     animate_gifs = False
     fullscreen = False

@@ -11,7 +11,10 @@ import re
 import shutil
 import tempfile
 from hashlib import md5
-from urllib import pathname2url
+try:
+    from urllib import pathname2url  # Py2
+except ImportError:
+    from urllib.request import pathname2url  # Py3
 
 from PIL import Image
 from gi.repository import GdkPixbuf
@@ -95,7 +98,7 @@ def _get_new_archive_thumbnail(path, dst_dir):
     if wanted is None:
         """ Then check for subarchives and extract only the first... """
         sub_re = re.compile(r'\.(tar|gz|bz2|rar|zip|7z|mobi)\s*$', re.I)
-        subs = filter(sub_re.search, files)
+        subs = [f for f in files if sub_re.search(f)]
         if subs:
             subarchive = extractor.set_files([subs[0]])
             extractor.extract()
@@ -174,7 +177,7 @@ def _uri_to_thumbpath(uri, dst_dir):
     """Return the full path to the thumbnail for <uri> when <dst_dir> the base
     thumbnail directory.
     """
-    md5hash = md5(uri).hexdigest()
+    md5hash = md5(uri.encode()).hexdigest()
     thumbpath = os.path.join(dst_dir, md5hash + '.png')
     return thumbpath
 
@@ -219,8 +222,8 @@ def _guess_cover(files):
     ext_re = re.compile('\.(' + '|'.join(get_supported_format_extensions_preg()) + ')\s*$', re.I)
 
     front_re = re.compile('(cover|front)', re.I)
-    images = filter(ext_re.search, files)
-    candidates = filter(front_re.search, images)
+    images = [f for f in files if ext_re.search(f)]
+    candidates = [f for f in images if front_re.search(f)]
     candidates = [c for c in candidates if 'back' not in c.lower()]
     if candidates:
         return candidates[0]

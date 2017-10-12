@@ -2,7 +2,7 @@
 """preferences.py - Preference handler."""
 from __future__ import absolute_import
 
-import cPickle
+import pickle
 import os
 
 from gi.repository import Gtk
@@ -511,8 +511,8 @@ def read_preferences_file():
         config = None
         try:
             config = open(_config_path, 'rb')
-            version = cPickle.load(config)
-            old_prefs = cPickle.load(config)
+            version = pickle.load(config)
+            old_prefs = pickle.load(config)
             config.close()
         except Exception:
             print('! Corrupt preferences file "{}", deleting...'.format(_config_path))
@@ -528,6 +528,6 @@ def read_preferences_file():
 def write_preferences_file():
     """Write preference data to disk."""
     config = open(_config_path, 'wb')
-    cPickle.dump(constants.VERSION, config, cPickle.HIGHEST_PROTOCOL)
-    cPickle.dump(prefs, config, cPickle.HIGHEST_PROTOCOL)
+    pickle.dump(constants.VERSION, config, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(prefs, config, pickle.HIGHEST_PROTOCOL)
     config.close()
