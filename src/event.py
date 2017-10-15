@@ -268,8 +268,12 @@ class EventHandler(object):
             self._window.actiongroup.get_action('lens').set_active(True)
         elif event.button == 3:
             self._window.cursor_handler.set_cursor_type(cursor.NORMAL)
-            self._window.popup.popup(None, None, None, event.button,
-                                     event.time)
+            self._window.popup.popup(parent_menu_shell=None,
+                                     parent_menu_item=None,
+                                     func=None,
+                                     data=None,
+                                     button=event.button,
+                                     activate_time=event.time)
         elif event.button == 8:  # Mouse "back" button
             self._window.previous_page()
         elif event.button == 9:  # Mouse "forward" button

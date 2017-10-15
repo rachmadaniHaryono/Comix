@@ -28,13 +28,13 @@ from src.preferences import prefs
 
 
 class MainWindow(Gtk.Window):
-    """The Comix main window, is created at start and terminates the
+    """
+    The Comix main window, is created at start and terminates the
     program when closed.
     """
 
     def __init__(self, animate_gifs=False, fullscreen=False, show_library=False, open_path=None, open_page=1):
-        GObject.GObject.__init__(self)
-
+        super(MainWindow, self).__init__(type=Gtk.WindowType.TOPLEVEL)
         # ----------------------------------------------------------------
         # Attributes
         # ----------------------------------------------------------------
@@ -57,6 +57,7 @@ class MainWindow(Gtk.Window):
         self.enhancer = enhance.ImageEnhancer(self)
         self.glass = lens.MagnifyingGlass(self)
         self.ui_manager = ui.MainUI(self)
+
         self.menubar = self.ui_manager.get_widget('/Menu')
         self.toolbar = self.ui_manager.get_widget('/Tool')
         self.popup = self.ui_manager.get_widget('/Popup')
@@ -98,19 +99,26 @@ class MainWindow(Gtk.Window):
         self._hadjust.page_increment = 1
 
         table = Gtk.Table(2, 2, False)
-        table.attach(self.thumbnailsidebar, 0, 1, 2, 5, Gtk.AttachOptions.FILL,
+        table.attach(self.thumbnailsidebar, 0, 1, 2, 5,
+                     Gtk.AttachOptions.FILL,
                      Gtk.AttachOptions.FILL | Gtk.AttachOptions.EXPAND, 0, 0)
-        table.attach(self._main_layout, 1, 2, 2, 3, Gtk.AttachOptions.FILL | Gtk.AttachOptions.EXPAND,
+        table.attach(self._main_layout, 1, 2, 2, 3,
+                     Gtk.AttachOptions.FILL | Gtk.AttachOptions.EXPAND,
                      Gtk.AttachOptions.FILL | Gtk.AttachOptions.EXPAND, 0, 0)
-        table.attach(self._vscroll, 2, 3, 2, 3, Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK,
+        table.attach(self._vscroll, 2, 3, 2, 3,
+                     Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK,
                      Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK, 0, 0)
-        table.attach(self._hscroll, 1, 2, 4, 5, Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK,
+        table.attach(self._hscroll, 1, 2, 4, 5,
+                     Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK,
                      Gtk.AttachOptions.FILL, 0, 0)
-        table.attach(self.menubar, 0, 3, 0, 1, Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK,
+        table.attach(self.menubar, 0, 3, 0, 1,
+                     Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK,
                      Gtk.AttachOptions.FILL, 0, 0)
-        table.attach(self.toolbar, 0, 3, 1, 2, Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK,
+        table.attach(self.toolbar, 0, 3, 1, 2,
+                     Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK,
                      Gtk.AttachOptions.FILL, 0, 0)
-        table.attach(self.statusbar, 0, 3, 5, 6, Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK,
+        table.attach(self.statusbar, 0, 3, 5, 6,
+                     Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK,
                      Gtk.AttachOptions.FILL, 0, 0)
 
         if prefs['default double page']:
@@ -170,6 +178,7 @@ class MainWindow(Gtk.Window):
                                      Gdk.EventMask.BUTTON_PRESS_MASK |
                                      Gdk.EventMask.BUTTON_RELEASE_MASK |
                                      Gdk.EventMask.POINTER_MOTION_MASK)
+
         self._main_layout.drag_dest_set(Gtk.DestDefaults.ALL,
                                         [Gtk.TargetEntry.new('text/uri-list', 0, 0)],
                                         Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
@@ -177,6 +186,7 @@ class MainWindow(Gtk.Window):
         self.connect('delete_event', self.terminate_program)
         self.connect('key_press_event', self._event_handler.key_press_event)
         self.connect('configure_event', self._event_handler.resize_event)
+
         self._main_layout.connect('button_release_event',
                                   self._event_handler.mouse_release_event)
         self._main_layout.connect('scroll_event',
@@ -190,6 +200,7 @@ class MainWindow(Gtk.Window):
 
         self.ui_manager.set_sensitivities()
         self.show()
+
         if open_path is not None:
             self.file_handler.open_file(open_path, open_page)
         if show_library:
@@ -739,9 +750,8 @@ class MainWindow(Gtk.Window):
         format (r, g, b). Values are 16-bit.
         """
         # TODO Removed in GTK3
-        # self._main_layout.modify_bg(Gtk.StateType.NORMAL,
-        #                             Gdk.colormap_get_system().alloc_color(Gdk.Color(
-        #                                     colour[0], colour[1], colour[2]), False, True))
+        self._main_layout.modify_bg(Gtk.StateType.NORMAL,
+                                    Gdk.Color(colour[0], colour[1], colour[2]))
 
     def _display_active_widgets(self):
         """Hide and/or show main window widgets depending on the current
@@ -799,7 +809,7 @@ class MainWindow(Gtk.Window):
         self.file_handler.cleanup()
         preferences.write_preferences_file()
         self.ui_manager.bookmarks.write_bookmarks_file()
-        # This hack is to avoid Python issue #1856.
+        # This hack is to avoid Python issue #1856. # Fixed in 3.2+
         for thread in threading.enumerate():
             if thread is not threading.currentThread():
                 thread.join()

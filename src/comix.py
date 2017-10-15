@@ -48,7 +48,7 @@ except AssertionError:
     print('Required GTK+ version is: 3.0.3 or higher\n')
     sys.exit(1)
 except ImportError:
-    print('PyGObject version 3.03 or higher is required to run Comix.')
+    print('PyGObject version 3.0.3 or higher is required to run Comix.')
     print('No version of PyGObject was found on your system.')
     sys.exit(1)
 
@@ -68,7 +68,7 @@ if not Image.VERSION >= '1.1.5':
 
 from src import constants
 from src import deprecated
-from src import main
+from src.main import MainWindow
 from src import icons
 from src import preferences
 
@@ -103,8 +103,7 @@ def run():
     open_path = None
     open_page = 1
     try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], 'fhla',
-                                       ['fullscreen', 'help', 'library', 'animate-gifs'])
+        opts, args = getopt.gnu_getopt(sys.argv[1:], 'fhla', ['fullscreen', 'help', 'library', 'animate-gifs'])
     except getopt.GetoptError:
         opts = args = []
         print_help()
@@ -134,9 +133,9 @@ def run():
         open_path = preferences.prefs['path to last file']
         open_page = preferences.prefs['page of last file']
 
-    window = main.MainWindow(animate_gifs=animate_gifs,
-                             fullscreen=fullscreen, show_library=show_library,
-                             open_path=open_path, open_page=open_page)
+    window = MainWindow(animate_gifs=animate_gifs,
+                        fullscreen=fullscreen, show_library=show_library,
+                        open_path=open_path, open_page=open_page)
     deprecated.check_for_deprecated_files(window)
 
     def sigterm_handler(signal, frame):

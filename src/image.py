@@ -175,10 +175,11 @@ def add_border(pixbuf, thickness, colour=0x000000FF):
     """Return a pixbuf from <pixbuf> with a <thickness> px border of
     <colour> added.
     """
-    return pixbuf
-    # TODO Not currently functional and causes a GTK crash.  Need to look into more
-    # canvas = GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB, True, 8, pixbuf.get_width() + thickness * 2, pixbuf.get_height() + thickness * 2)  # TODO GObject.__init__ no longer takes arguments
-    canvas = GdkPixbuf.Pixbuf()
+    canvas = GdkPixbuf.Pixbuf.new(colorspace=GdkPixbuf.Colorspace.RGB,
+                                  has_alpha=True,
+                                  bits_per_sample=8,
+                                  width=pixbuf.get_width() + thickness * 2,
+                                  height=pixbuf.get_height() + thickness * 2)
     canvas.fill(colour)
     pixbuf.copy_area(0, 0, pixbuf.get_width(), pixbuf.get_height(), canvas, thickness, thickness)
     return canvas
@@ -196,10 +197,10 @@ def get_most_common_edge_colour(pixbuf):
         pixbuf = pixbuf.get_static_image()
     width = pixbuf.get_width()
     height = pixbuf.get_height()
-    top_edge = GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB, True, 8, width, 1)
-    bottom_edge = GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB, True, 8, width, 1)
-    left_edge = GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB, True, 8, 1, height)
-    right_edge = GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB, True, 8, 1, height)
+    top_edge = GdkPixbuf.Pixbuf.new(colorspace=GdkPixbuf.Colorspace.RGB, has_alpha=True, bits_per_sample=8, width=width, height=1)
+    bottom_edge = GdkPixbuf.Pixbuf.new(colorspace=GdkPixbuf.Colorspace.RGB, has_alpha=True, bits_per_sample=8, width=width, height=1)
+    left_edge = GdkPixbuf.Pixbuf.new(colorspace=GdkPixbuf.Colorspace.RGB, has_alpha=True, bits_per_sample=8, width=1, height=height)
+    right_edge = GdkPixbuf.Pixbuf.new(colorspace=GdkPixbuf.Colorspace.RGB, has_alpha=True, bits_per_sample=8, width=1, height=height)
     pixbuf.copy_area(0, 0, width, 1, top_edge, 0, 0)
     pixbuf.copy_area(0, height - 1, width, 1, bottom_edge, 0, 0)
     pixbuf.copy_area(0, 0, 1, height, left_edge, 0, 0)

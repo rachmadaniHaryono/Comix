@@ -67,11 +67,10 @@ class _ComicFileChooserDialog(Gtk.Dialog):
         self._preview_image.set_size_request(130, 130)
         preview_box.pack_start(self._preview_image, False, False, 0)
         self.filechooser.set_preview_widget(preview_box)
-        self._namelabel = labels.FormattedLabel(weight=Pango.Weight.BOLD,
-                                                scale=PANGO_SCALE_SMALL)
+        self._namelabel = labels.BoldLabel()
         self._namelabel.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
         preview_box.pack_start(self._namelabel, False, False, 0)
-        self._sizelabel = labels.FormattedLabel(scale=PANGO_SCALE_SMALL)
+        self._sizelabel = Gtk.Label()
         self._sizelabel.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
         preview_box.pack_start(self._sizelabel, False, False, 0)
         self.filechooser.set_use_preview_label(False)

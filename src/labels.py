@@ -2,8 +2,7 @@
 """labels.py - Gtk.Label convenience classes."""
 from __future__ import absolute_import
 
-from gi.repository import GObject, Gtk
-from gi.repository import Pango
+from gi.repository import Gtk
 
 
 class FormattedLabel(Gtk.Label):
@@ -11,36 +10,33 @@ class FormattedLabel(Gtk.Label):
     style and scale, even when new text is set using set_text().
     """
 
-    def __init__(self, text='', weight=Pango.Weight.NORMAL, style=Pango.Style.NORMAL, scale=1.0):
-        # GObject.GObject.__init__(self, text) # TODO GObject.__init__ no longer takes arguments
-        GObject.GObject.__init__(self)
-        self._weight = weight
-        self._style = style
-        self._scale = scale
+    def __init__(self, text=''):
+        super(FormattedLabel, self).__init__(text)
         self._format()
 
     def set_text(self, text):
-        Gtk.Label.set_text(self, text)
+        super(FormattedLabel, self).set_text(text)
         self._format()
 
     def _format(self):
-        text_len = len(self.get_text())
-        # attrlist = Pango.AttrList()
-        # attrlist.insert(Pango.AttrWeight(self._weight, 0, text_len))
-        # attrlist.insert(Pango.AttrStyle(self._style, 0, text_len))
-        # attrlist.insert(Pango.AttrScale(self._scale, 0, text_len))
-        # self.set_attributes(attrlist)
+        self.set_markup("<b>{}</b>".format(self.get_label()))
 
 
 class BoldLabel(FormattedLabel):
     """A FormattedLabel that is always bold and otherwise normal."""
 
     def __init__(self, text=''):
-        FormattedLabel.__init__(self, text, weight=Pango.Weight.BOLD)
+        super(BoldLabel, self).__init__(text)
+
+    def _format(self):
+        self.set_markup("<b>{}</b>".format(self.get_label()))
 
 
 class ItalicLabel(FormattedLabel):
     """A FormattedLabel that is always italic and otherwise normal."""
 
     def __init__(self, text=''):
-        FormattedLabel.__init__(self, text, style=Pango.Style.ITALIC)
+        super(ItalicLabel, self).__init__(text)
+
+    def _format(self):
+        self.set_markup("<i>{}</i>".format(self.get_label()))

@@ -100,7 +100,7 @@ class _ThumbnailMaintenanceDialog(Gtk.Dialog):
 
         self.show_all()
         while Gtk.events_pending():
-            Gtk.main_iteration(False)
+            Gtk.main_iteration()
         self._update_num_and_size()
 
     def _update_num_and_size(self):
