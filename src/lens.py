@@ -49,8 +49,11 @@ class MagnifyingGlass(object):
         """Get a pixbuf containing the appropiate image data for the lens
         where <x> and <y> are the positions of the cursor.
         """
-        # canvas = GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB, True, 8, prefs['lens size'], prefs['lens size']) # TODO GObject.__init__ no longer takes arguments
-        canvas = GdkPixbuf.Pixbuf()
+        canvas = GdkPixbuf.Pixbuf.new(colorspace=GdkPixbuf.Colorspace.RGB,
+                                      has_alpha=True,
+                                      bits_per_sample=8,
+                                      width=prefs['lens size'],
+                                      height=prefs['lens size'])
         canvas.fill(0x000000bb)
         if self._window.displayed_double():
             if self._window.is_manga_mode:

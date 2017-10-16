@@ -34,8 +34,8 @@ class _EditArchiveDialog(Gtk.Dialog):
     """
 
     def __init__(self, window):
-        # GObject.GObject.__init__(self, _('Edit archive'), window, Gtk.DialogFlags.MODAL, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)) # TODO GObject.__init__ no longer takes arguments
-        GObject.GObject.__init__(self)
+        super(_EditArchiveDialog, self).__init__(title=_('Edit archive'), parent=window, flags=Gtk.DialogFlags.MODAL)
+        self.add_buttons(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
 
         self.kill = False  # Dialog is killed.
         self.file_handler = window.file_handler
@@ -44,9 +44,7 @@ class _EditArchiveDialog(Gtk.Dialog):
         # There is no stock response for "import", but by using
         # RESPONSE_HELP we automatically get the button placed at the left.
         self._import_button = self.add_button(_('Import'), Gtk.ResponseType.HELP)
-        self._import_button.set_image(Gtk.Image.new_from_stock(Gtk.STOCK_ADD,
-                                                               Gtk.IconSize.BUTTON))
-        # self.set_has_separator(False)         # TODO Removed in GTK3
+        self._import_button.set_image(Gtk.Image.new_from_stock(Gtk.STOCK_ADD, Gtk.IconSize.BUTTON))
         self.set_border_width(4)
         self.resize(min(Gdk.Screen.get_default().get_width() - 50, 750),
                     min(Gdk.Screen.get_default().get_height() - 50, 600))

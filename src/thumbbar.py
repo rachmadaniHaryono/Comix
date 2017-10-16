@@ -5,14 +5,15 @@ from __future__ import absolute_import
 try:
     from urllib import pathname2url  # Py2
 except ImportError:
+    # noinspection PyCompatibility,PyUnresolvedReferences
     from urllib.request import pathname2url  # Py3
 
 
 from PIL import Image
 from PIL import ImageDraw
-from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
+from gi.repository import GObject
 from gi.repository import Gtk
 
 from src import image
@@ -20,7 +21,7 @@ from src.preferences import prefs
 
 # Compatibility
 try:
-    # noinspection PyUnresolvedReferences
+    # noinspection PyUnresolvedReferences,PyShadowingBuiltins
     range = xrange  # Python2
 except NameError:
     pass
@@ -30,12 +31,12 @@ class ThumbnailSidebar(Gtk.HBox):
     """A thumbnail sidebar including scrollbar for the main window."""
 
     def __init__(self, window):
-        # GObject.GObject.__init__(self, False, 0)  # TODO GObject.__init__ no longer takes arguments
-        GObject.GObject.__init__(self)
+        super(ThumbnailSidebar, self).__init__(homogeneous=False, spacing=0)
         self._window = window
         self._loaded = False
         self._load_task = None
         self._height = 0
+        self._stop_update = False
 
         self._liststore = Gtk.ListStore(GdkPixbuf.Pixbuf)
         self._treeview = Gtk.TreeView(self._liststore)
@@ -73,6 +74,7 @@ class ThumbnailSidebar(Gtk.HBox):
         """Return the width in pixels of the ThumbnailSidebar."""
         return self._layout.size_request().width + self._scroll.size_request().width
 
+    # noinspection PyUnusedLocal
     def show(self, *args):
         """Show the ThumbnailSidebar."""
         self.show_all()
@@ -96,9 +98,11 @@ class ThumbnailSidebar(Gtk.HBox):
 
     def load_thumbnails(self):
         """Load the thumbnails, if it is appropriate to do so."""
-        if (self._loaded or not self._window.file_handler.file_loaded or
-                not prefs['show thumbnails'] or prefs['hide all'] or
-                (self._window.is_fullscreen and prefs['hide all in fullscreen'])):
+        if any([self._loaded,
+                not self._window.file_handler.file_loaded,
+                not prefs['show thumbnails'],
+                prefs['hide all'],
+                (self._window.is_fullscreen and prefs['hide all in fullscreen'])]):
             return
 
         self._loaded = True
@@ -128,8 +132,7 @@ class ThumbnailSidebar(Gtk.HBox):
             create = prefs['create thumbnails']
         self._stop_update = False
         for i in range(1, self._window.file_handler.get_number_of_pages() + 1):
-            pixbuf = self._window.file_handler.get_thumbnail(i,
-                                                             prefs['thumbnail size'], prefs['thumbnail size'], create)
+            pixbuf = self._window.file_handler.get_thumbnail(i, prefs['thumbnail size'], prefs['thumbnail size'], create)
             if prefs['show page numbers on thumbnails']:
                 _add_page_number(pixbuf, i)
             pixbuf = image.add_border(pixbuf, 1)
@@ -145,18 +148,19 @@ class ThumbnailSidebar(Gtk.HBox):
 
     def _get_selected_row(self):
         """Return the index of the currently selected row."""
+        selected_rows = self._selection.get_selected_rows()
         try:
-            return self._selection.get_selected_rows()[1][0][0]
-        except Exception:
+            return selected_rows[1][0][0]
+        except IndexError:
             return None
 
+    # noinspection PyUnusedLocal
     def _selection_event(self, tree_selection):
         """Handle events due to changed thumbnail selection."""
-        try:
+        if self._get_selected_row() is not None:
             self._window.set_page(self._get_selected_row() + 1)
-        except Exception:
-            pass
 
+    # noinspection PyUnusedLocal
     def _scroll_event(self, widget, event):
         """Handle scroll events on the thumbnail sidebar."""
         if event.direction == Gdk.ScrollDirection.UP:
@@ -165,32 +169,26 @@ class ThumbnailSidebar(Gtk.HBox):
             upper = self._vadjust.get_upper() - self._vadjust.get_page_size()
             self._vadjust.set_value(min(self._vadjust.get_value() + 60, upper))
 
+    # noinspection PyUnusedLocal
     def _drag_data_get(self, treeview, context, selection, *args):
-        """Put the URI of the selected file into the SelectionData, so that
+        """
+        Put the URI of the selected file into the SelectionData, so that
         the file can be copied (e.g. to a file manager).
         """
-        try:
-            selected = self._get_selected_row()
-            path = self._window.file_handler.get_path_to_page(selected + 1)
-            uri = 'file://localhost' + pathname2url(path)
-            selection.set_uris([uri])
-        except Exception:
-            pass
+        selected = self._get_selected_row()
+        path = self._window.file_handler.get_path_to_page(selected + 1)
+        uri = 'file://localhost' + pathname2url(path)
+        selection.set_uris([uri])
 
     def _drag_begin(self, treeview, context):
-        """We hook up on drag_begin events so that we can set the hotspot
+        """
+        We hook up on drag_begin events so that we can set the hotspot
         for the cursor at the top left corner of the thumbnail (so that we
         might actually see where we are dropping!).
         """
         path = treeview.get_cursor()[0]
         pixmap = treeview.create_row_drag_icon(path)
-        # context.set_icon_pixmap() seems to cause crashes, so we do a
-        # quick and dirty conversion to pixbuf.
-        pointer = GdkPixbuf.Pixbuf(GdkPixbuf.Colorspace.RGB, True, 8,
-                                   *pixmap.get_size())
-        pointer = pointer.get_from_drawable(pixmap, treeview.get_colormap(),
-                                            0, 0, 0, 0, *pixmap.get_size())
-        context.set_icon_pixbuf(pointer, -5, -5)
+        Gtk.drag_set_icon_surface(context, pixmap)
 
 
 def _add_page_number(pixbuf, page):

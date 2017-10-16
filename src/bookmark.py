@@ -22,8 +22,7 @@ class BookmarksMenu(Gtk.Menu):
     """
 
     def __init__(self, ui, window):
-        GObject.GObject.__init__(self)
-
+        super(BookmarksMenu, self).__init__()
         self._window = window
         self._actiongroup = Gtk.ActionGroup('comix-bookmarks')
         self._actiongroup.add_actions([
@@ -226,13 +225,10 @@ class _BookmarksDialog(Gtk.Dialog):
     """_BookmarksDialog lets the user remove and/or rearrange bookmarks."""
 
     def __init__(self, window, bookmarks_store):
-        # GObject.GObject.__init__(self, _('Edit bookmarks'), window, Gtk.DialogFlags.MODAL,
-        #                     (Gtk.STOCK_REMOVE, Gtk.ResponseType.NO, Gtk.STOCK_CLOSE,
-        #                      Gtk.ResponseType.CLOSE))  # TODO GObject.__init__ no longer takes arguments
-        GObject.GObject.__init__(self)
+        super(_BookmarksDialog, self).__init__(title=_('Edit bookmarks'), parent=window, flags=Gtk.DialogFlags.MODAL)
+        self.add_buttons(Gtk.STOCK_REMOVE, Gtk.ResponseType.NO, Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
         self._bookmarks_store = bookmarks_store
 
-        # self.set_has_separator(False) # TODO Removed in GTK3
         self.set_resizable(True)
         self.set_default_response(Gtk.ResponseType.CLOSE)
 

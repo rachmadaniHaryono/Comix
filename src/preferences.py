@@ -5,7 +5,6 @@ from __future__ import absolute_import, division
 import os
 import pickle
 
-from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import Gtk
 
@@ -126,13 +125,13 @@ class _PreferencesDialog(Gtk.Dialog):
         page.new_section(_('Magnifying Glass'))
         label = Gtk.Label(label='{}:'.format(_('Magnifying glass size (in pixels)')))
         adjustment = Gtk.Adjustment(prefs['lens size'], 50, 400, 1, 10)
-        glass_size_spinner= Gtk.SpinButton.new(adjustment, climb_rate=1, digits=0)
+        glass_size_spinner = Gtk.SpinButton.new(adjustment, climb_rate=1, digits=0)
         glass_size_spinner.connect('value_changed', self._spinner_cb, 'lens size')
         glass_size_spinner.set_tooltip_text(_('Set the size of the magnifying glass. It is a square with a side of this many pixels.'))
         page.add_row(label, glass_size_spinner)
         label = Gtk.Label(label='{}:'.format(_('Magnification factor')))
         adjustment = Gtk.Adjustment(prefs['lens magnification'], 1.1, 10.0, 0.1, 1.0)
-        glass_magnification_spinner =  Gtk.SpinButton.new(adjustment, climb_rate=1, digits=1)
+        glass_magnification_spinner = Gtk.SpinButton.new(adjustment, climb_rate=1, digits=1)
         glass_magnification_spinner.connect('value_changed', self._spinner_cb, 'lens magnification')
         glass_magnification_spinner.set_tooltip_text(_('Set the magnification factor of the magnifying glass.'))
         page.add_row(label, glass_magnification_spinner)
@@ -375,8 +374,7 @@ class _PreferencePage(Gtk.VBox):
         """Create a new page where any possible right columns have the
         width request <right_column_width>.
         """
-        # GObject.GObject.__init__(self, False, 12) # TODO GObject.__init__ no longer takes arguments
-        GObject.GObject.__init__(self)
+        super(_PreferencePage, self).__init__(homogeneous=False, spacing=12)
         self.set_border_width(12)
         self._right_column_width = right_column_width
         self._section = None
@@ -414,8 +412,7 @@ class _PreferenceSection(Gtk.VBox):
         <header>, and the width request of the (possible) right columns
         set to that of <right_column_width>.
         """
-        # GObject.GObject.__init__(self, False, 0) # TODO GObject.__init__ no longer takes arguments
-        GObject.GObject.__init__(self)
+        super(_PreferenceSection, self).__init__(homogeneous=False, spacing=0)
         self._right_column_width = right_column_width
         self.contentbox = Gtk.VBox(False, 6)
         label = labels.BoldLabel(header)

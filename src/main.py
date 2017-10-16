@@ -749,9 +749,7 @@ class MainWindow(Gtk.Window):
         """Set the background colour to <colour>. Colour is a sequence in the
         format (r, g, b). Values are 16-bit.
         """
-        # TODO Removed in GTK3
-        self._main_layout.modify_bg(Gtk.StateType.NORMAL,
-                                    Gdk.Color(colour[0], colour[1], colour[2]))
+        self._main_layout.modify_bg(Gtk.StateType.NORMAL, Gdk.Color(colour[0], colour[1], colour[2]))
 
     def _display_active_widgets(self):
         """Hide and/or show main window widgets depending on the current

@@ -6,7 +6,6 @@ import os
 import stat
 import time
 
-from gi.repository import GObject
 from gi.repository import Gdk
 from gi.repository import Gtk
 
@@ -31,8 +30,7 @@ class _Page(Gtk.VBox):
     """
 
     def __init__(self):
-        # GObject.GObject.__init__(self, False, 12) # TODO GObject.__init__ no longer takes arguments
-        GObject.GObject.__init__(self)
+        super(_Page, self).__init__(homogeneous=False, spacing=12)
 
         self.set_border_width(12)
         topbox = Gtk.HBox(False, 12)
@@ -95,12 +93,9 @@ class _Page(Gtk.VBox):
 class _PropertiesDialog(Gtk.Dialog):
 
     def __init__(self, window):
-
-        # GObject.GObject.__init__(self, _('Properties'), window, 0, (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)) # TODO GObject.__init__ no longer takes arguments
-        GObject.GObject.__init__(self)
-
+        super(_PropertiesDialog, self).__init__(title=_('Properties'), parent=window, flags=0)
+        self.add_buttons(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
         self.set_resizable(False)
-        # self.set_has_separator(False)         # TODO Removed in GTK3
         self.connect('response', _close_dialog)
         self.set_default_response(Gtk.ResponseType.CLOSE)
         notebook = Gtk.Notebook()

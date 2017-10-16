@@ -4,7 +4,6 @@ from __future__ import absolute_import, division
 
 import os
 
-from gi.repository import GObject
 from gi.repository import Gtk
 from gi.repository import Pango
 
@@ -36,7 +35,7 @@ class _ComicFileChooserDialog(Gtk.Dialog):
 
     _last_activated_file = None
 
-    def __init__(self, action=Gtk.FileChooserAction.OPEN):
+    def __init__(self, parent=None, action=Gtk.FileChooserAction.OPEN):
         self._action = action
         if action == Gtk.FileChooserAction.OPEN:
             title = _('Open')
@@ -47,10 +46,9 @@ class _ComicFileChooserDialog(Gtk.Dialog):
             buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                        Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
 
-        # GObject.GObject.__init__(self, title, None, 0, buttons)  # TODO GObject.__init__ no longer takes arguments
-        GObject.GObject.__init__(self)
+        super(_ComicFileChooserDialog, self).__init__(title=title, parent=parent, flags=0)
+        self.add_buttons(*buttons)
         self.set_default_response(Gtk.ResponseType.OK)
-        # self.set_has_separator(False)
 
         self.filechooser = Gtk.FileChooserWidget(action=action)
         self.filechooser.set_size_request(680, 420)
@@ -58,8 +56,7 @@ class _ComicFileChooserDialog(Gtk.Dialog):
         self.set_border_width(4)
         self.filechooser.set_border_width(6)
         self.connect('response', self._response)
-        self.filechooser.connect('file_activated', self._response,
-                                 Gtk.ResponseType.OK)
+        self.filechooser.connect('file_activated', self._response, Gtk.ResponseType.OK)
 
         preview_box = Gtk.VBox(False, 10)
         preview_box.set_size_request(130, 0)
@@ -94,15 +91,11 @@ class _ComicFileChooserDialog(Gtk.Dialog):
                         ('application/x-tar', 'application/x-gzip',
                          'application/x-bzip2', 'application/x-cbt'))
 
-        try:
-            if self.__class__._last_activated_file is not None and os.path.isfile(self.__class__._last_activated_file):
-                self.filechooser.set_filename(
-                        self.__class__._last_activated_file)
-            elif os.path.isdir(prefs['path of last browsed in filechooser']):
-                self.filechooser.set_current_folder(
-                        prefs['path of last browsed in filechooser'])
-        except Exception:  # E.g. broken prefs values.
-            pass
+        if self.__class__._last_activated_file is not None and os.path.isfile(self.__class__._last_activated_file):
+            self.filechooser.set_filename(self.__class__._last_activated_file)
+        elif prefs['path of last browsed in filechooser'] and os.path.isdir(prefs['path of last browsed in filechooser']):
+            self.filechooser.set_current_folder(prefs['path of last browsed in filechooser'])
+
         self.show_all()
 
     def add_filter(self, name, mimes):
@@ -121,6 +114,7 @@ class _ComicFileChooserDialog(Gtk.Dialog):
     def set_current_directory(self, path):
         self.filechooser.set_current_folder(path)
 
+    # noinspection PyUnusedLocal
     def _response(self, widget, response):
         """Return a list of the paths of the chosen files, or None if the
         event only changed the current directory.
@@ -142,20 +136,19 @@ class _ComicFileChooserDialog(Gtk.Dialog):
                                                      Gtk.ButtonsType.OK_CANCEL,
                                                      _("A file named '{}' already exists. "
                                                        "Do you want to replace it?").format(os.path.basename(paths[0])))
-                overwrite_dialog.format_secondary_text(
-                        _('Replacing it will overwrite its contents.'))
+                overwrite_dialog.format_secondary_text(_('Replacing it will overwrite its contents.'))
                 response = overwrite_dialog.run()
                 overwrite_dialog.destroy()
                 if response != Gtk.ResponseType.OK:
                     self.emit_stop_by_name('response')
                     return
-            prefs['path of last browsed in filechooser'] = \
-                self.filechooser.get_current_folder()
+            prefs['path of last browsed in filechooser'] = self.filechooser.get_current_folder()
             self.__class__._last_activated_file = paths[0]
             self.files_chosen(paths)
         else:
             self.files_chosen([])
 
+    # noinspection PyUnusedLocal
     def _update_preview(self, *args):
         path = self.filechooser.get_preview_filename()
         if path and os.path.isfile(path):
@@ -167,10 +160,8 @@ class _ComicFileChooserDialog(Gtk.Dialog):
             else:
                 pixbuf = image.add_border(pixbuf, 1)
                 self._preview_image.set_from_pixbuf(pixbuf)
-                self._namelabel.set_text(encoding.to_unicode(
-                        os.path.basename(path)))
-                self._sizelabel.set_text(
-                        '{:.1f} KiB'.format(os.stat(path).st_size / 1024.0))
+                self._namelabel.set_text(encoding.to_unicode(os.path.basename(path)))
+                self._sizelabel.set_text('{:.1f} KiB'.format(os.stat(path).st_size / 1024.0))
         else:
             self._preview_image.clear()
             self._namelabel.set_text('')
@@ -181,7 +172,7 @@ class _MainFileChooserDialog(_ComicFileChooserDialog):
     """The normal filechooser dialog used with the "Open" menu item."""
 
     def __init__(self, window):
-        _ComicFileChooserDialog.__init__(self)
+        super(_MainFileChooserDialog, self).__init__(parent=window)
         self._window = window
         self.set_transient_for(window)
 
@@ -196,26 +187,13 @@ class _MainFileChooserDialog(_ComicFileChooserDialog):
         self.add_filter(_('BMP images'), ('image/bmp',))
 
         filters = self.filechooser.list_filters()
-        try:
-            # When setting this to the first filter ("All files"), this
-            # fails on some GTK+ versions and sets the filter to "blank".
-            # The effect is the same though (i.e. display all files), and
-            # there is no solution that I know of, so we'll have to live
-            # with it. It only happens the second time a dialog is created
-            # though, which is very strange.
-            self.filechooser.set_filter(filters[
-                                            prefs['last filter in main filechooser']])
-        except:
-            self.filechooser.set_filter(filters[0])
+        self.filechooser.set_filter(filters[prefs['last filter in main filechooser']])
 
     def files_chosen(self, paths):
         if paths:
-            try:  # For some reason this fails sometimes (GTK+ bug?)
-                filter_index = self.filechooser.list_filters().index(
-                        self.filechooser.get_filter())
-                prefs['last filter in main filechooser'] = filter_index
-            except:
-                pass
+            filter_index = self.filechooser.list_filters().index(self.filechooser.get_filter())
+            prefs['last filter in main filechooser'] = filter_index
+
             _close_main_filechooser_dialog()
             self._window.file_handler.open_file(paths[0])
         else:
@@ -226,42 +204,29 @@ class _LibraryFileChooserDialog(_ComicFileChooserDialog):
     """The filechooser dialog used when adding books to the library."""
 
     def __init__(self, library):
-        _ComicFileChooserDialog.__init__(self)
+        super(_LibraryFileChooserDialog, self).__init__(parent=library)
         self._library = library
         self.set_transient_for(library)
         self.filechooser.set_select_multiple(True)
-        self.filechooser.connect('current_folder_changed',
-                                 self._set_collection_name)
+        self.filechooser.connect('current_folder_changed', self._set_collection_name)
 
-        self._collection_button = Gtk.CheckButton(
-                '{}:'.format(_('Automatically add the books to this collection')),
-                False)
-        self._collection_button.set_active(
-                prefs['auto add books into collections'])
-        self._comboentry = Gtk.combo_box_entry_new_text()
+        self._collection_button = Gtk.CheckButton('{}:'.format(_('Automatically add the books to this collection')), False)
+        self._collection_button.set_active(prefs['auto add books into collections'])
+        self._comboentry = Gtk.ComboBox.new_with_entry()
         self._comboentry.get_child().set_activates_default(True)
         for collection in self._library.backend.get_all_collections():
             name = self._library.backend.get_collection_name(collection)
             self._comboentry.append_text(name)
         collection_box = Gtk.HBox(False, 6)
-        collection_box.pack_start(self._collection_button, False, False)
-        collection_box.pack_start(self._comboentry, True, True)
+        collection_box.pack_start(child=self._collection_button, expand=False, fill=False, padding=0)
+        collection_box.pack_start(child=self._comboentry, expand=True, fill=True, padding=0)
         collection_box.show_all()
         self.filechooser.set_extra_widget(collection_box)
 
         filters = self.filechooser.list_filters()
-        try:
-            # When setting this to the first filter ("All files"), this
-            # fails on some GTK+ versions and sets the filter to "blank".
-            # The effect is the same though (i.e. display all files), and
-            # there is no solution that I know of, so we'll have to live
-            # with it. It only happens the second time a dialog is created
-            # though, which is very strange.
-            self.filechooser.set_filter(filters[
-                                            prefs['last filter in library filechooser']])
-        except Exception:
-            self.filechooser.set_filter(filters[1])
+        self.filechooser.set_filter(filters[prefs['last filter in library filechooser']])
 
+    # noinspection PyUnusedLocal
     def _set_collection_name(self, *args):
         """Set the text in the ComboBoxEntry to the name of the current
         directory.
@@ -273,18 +238,15 @@ class _LibraryFileChooserDialog(_ComicFileChooserDialog):
         if paths:
             if self._collection_button.get_active():
                 prefs['auto add books into collections'] = True
-                collection_name = self._comboentry.get_active_text()
+                collection_name = self._comboentry.get_title()
                 if not collection_name:  # No empty-string names.
                     collection_name = None
             else:
                 prefs['auto add books into collections'] = False
                 collection_name = None
-            try:  # For some reason this fails sometimes (GTK+ bug?)
-                filter_index = self.filechooser.list_filters().index(
-                        self.filechooser.get_filter())
-                prefs['last filter in library filechooser'] = filter_index
-            except Exception:
-                pass
+            filter_index = self.filechooser.list_filters().index(self.filechooser.get_filter())
+            prefs['last filter in library filechooser'] = filter_index
+
             close_library_filechooser_dialog()
             self._library.add_books(paths, collection_name)
         else:
@@ -292,14 +254,15 @@ class _LibraryFileChooserDialog(_ComicFileChooserDialog):
 
 
 class StandAloneFileChooserDialog(_ComicFileChooserDialog):
-    """A simple filechooser dialog that is designed to be used with the
+    """
+    A simple filechooser dialog that is designed to be used with the
     Gtk.Dialog.run() method. The <action> dictates what type of filechooser
     dialog we want (i.e. save or open). If the type is an open-dialog, we
     use multiple selection by default.
     """
 
     def __init__(self, action=Gtk.FileChooserAction.OPEN):
-        _ComicFileChooserDialog.__init__(self, action)
+        super(StandAloneFileChooserDialog, self).__init__(action=action)
         if action == Gtk.FileChooserAction.OPEN:
             self.filechooser.set_select_multiple(True)
         self._paths = None
@@ -324,6 +287,7 @@ class StandAloneFileChooserDialog(_ComicFileChooserDialog):
         self._paths = paths
 
 
+# noinspection PyUnusedLocal
 def open_main_filechooser_dialog(action, window):
     """Open the main filechooser dialog."""
     global _main_filechooser_dialog
@@ -333,6 +297,7 @@ def open_main_filechooser_dialog(action, window):
         _main_filechooser_dialog.present()
 
 
+# noinspection PyUnusedLocal
 def _close_main_filechooser_dialog(*args):
     """Close the main filechooser dialog."""
     global _main_filechooser_dialog
@@ -350,6 +315,7 @@ def open_library_filechooser_dialog(library):
         _library_filechooser_dialog.present()
 
 
+# noinspection PyUnusedLocal
 def close_library_filechooser_dialog(*args):
     """Close the library filechooser dialog."""
     global _library_filechooser_dialog

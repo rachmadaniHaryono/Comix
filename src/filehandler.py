@@ -676,10 +676,11 @@ def alphanumeric_sort(filenames):
 
 
 def list_dir_sorted(dir_name):
-    """ Helper for listing the directory contents with the preferred
-    sorting.  """
+    """
+    Helper for listing the directory contents with the preferred
+    sorting.
+     """
     files = os.listdir(dir_name)
-    # files.sort(locale.strcoll)
     alphanumeric_sort(files)
     return files
 

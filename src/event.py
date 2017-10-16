@@ -327,11 +327,10 @@ class EventHandler(object):
         else:
             self._window.cursor_handler.refresh()
 
-    def drag_n_drop_event(self, widget, context, x, y, selection, drag_id,
-                          eventtime):
+    def drag_n_drop_event(self, widget, context, x, y, selection, drag_id, eventtime):
         """Handle drag-n-drop events on the main layout area."""
         # The drag source is inside Comix itself, so we ignore.
-        if context.get_source_widget() is not None:
+        if context.get_source_window() is not None:
             return
         uris = selection.get_uris()
         if not uris:

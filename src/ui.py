@@ -6,7 +6,6 @@ given it's own file for the sake of readability.
 """
 from __future__ import absolute_import
 
-from gi.repository import GObject
 from gi.repository import Gtk
 
 from src import about
@@ -25,7 +24,7 @@ from src import thumbremover
 class MainUI(Gtk.UIManager):
 
     def __init__(self, window):
-        GObject.GObject.__init__(self)
+        super(MainUI, self).__init__()
         self._window = window
 
         # ----------------------------------------------------------------
@@ -33,110 +32,64 @@ class MainUI(Gtk.UIManager):
         # ----------------------------------------------------------------
         self._actiongroup = Gtk.ActionGroup('comix-main')
         self._actiongroup.add_actions([
-            ('next_page', Gtk.STOCK_GO_FORWARD, _('_Next page'),
-             'Page_Down', None, window.next_page),
-            ('previous_page', Gtk.STOCK_GO_BACK, _('_Previous page'),
-             'Page_Up', None, window.previous_page),
-            ('first_page', Gtk.STOCK_GOTO_FIRST, _('_First page'),
-             'Home', None, window.first_page),
-            ('last_page', Gtk.STOCK_GOTO_LAST, _('_Last page'),
-             'End', None, window.last_page),
-            ('zoom_in', Gtk.STOCK_ZOOM_IN, _('_Zoom in'),
-             'KP_Add', None, window.manual_zoom_in),
-            ('zoom_out', Gtk.STOCK_ZOOM_OUT, _('Zoom _out'),
-             'KP_Subtract', None, window.manual_zoom_out),
-            ('zoom_original', Gtk.STOCK_ZOOM_100, _('O_riginal size'),
-             '<Control>0', None, window.manual_zoom_original),
-            ('close', Gtk.STOCK_CLOSE, _('_Close'),
-             '<Control>w', None, window.file_handler.close_file),
-            ('quit', Gtk.STOCK_QUIT, _('_Quit'),
-             '<Control>q', None, window.terminate_program),
-            ('rotate_90', 'comix-rotate-90', _('_Rotate 90 degrees CW'),
-             'r', None, window.rotate_90),
-            ('rotate_180', 'comix-rotate-180', _('Rotate 180 de_grees'),
-             None, None, window.rotate_180),
-            ('rotate_270', 'comix-rotate-270', _('Rotat_e 90 degrees CCW'),
-             '<Shift>r', None, window.rotate_270),
-            ('flip_horiz', 'comix-flip-horizontal', _('Fli_p horizontally'),
-             None, None, window.flip_horizontally),
-            ('flip_vert', 'comix-flip-vertical', _('Flip _vertically'),
-             None, None, window.flip_vertically),
-            ('extract_page', None, _('Extract page...'),
-             None, None, window.extract_page),
-            ('menu_zoom', 'comix-zoom', _('Manual _Zoom')),
-            ('menu_recent', None, _('Open _recent')),
-            ('menu_bookmarks', None, _('_Bookmarks')),
-            ('menu_toolbars', None, _('T_oolbars')),
-            ('menu_edit', None, _('_Edit')),
-            ('menu_file', None, _('_File')),
-            ('menu_view', None, _('_View')),
-            ('menu_go', None, _('_Go')),
-            ('menu_help', None, _('_Help')),
-            ('menu_transform', 'comix-transform', _('_Transform')),
+            ('next_page', Gtk.STOCK_GO_FORWARD, _('_Next page'), 'Page_Down', None, window.next_page),
+            ('previous_page', Gtk.STOCK_GO_BACK, _('_Previous page'), 'Page_Up', None, window.previous_page),
+            ('first_page', Gtk.STOCK_GOTO_FIRST, _('_First page'), 'Home', None, window.first_page),
+            ('last_page', Gtk.STOCK_GOTO_LAST, _('_Last page'), 'End', None, window.last_page),
+            ('zoom_in', Gtk.STOCK_ZOOM_IN, _('_Zoom in'), 'KP_Add', None, window.manual_zoom_in),
+            ('zoom_out', Gtk.STOCK_ZOOM_OUT, _('Zoom _out'), 'KP_Subtract', None, window.manual_zoom_out),
+            ('zoom_original', Gtk.STOCK_ZOOM_100, _('O_riginal size'), '<Control>0', None, window.manual_zoom_original),
+            ('close', Gtk.STOCK_CLOSE, _('_Close'), '<Control>w', None, window.file_handler.close_file),
+            ('quit', Gtk.STOCK_QUIT, _('_Quit'), '<Control>q', None, window.terminate_program),
+            ('rotate_90', 'comix-rotate-90', _('_Rotate 90 degrees CW'), 'r', None, window.rotate_90),
+            ('rotate_180', 'comix-rotate-180', _('Rotate 180 de_grees'), None, None, window.rotate_180),
+            ('rotate_270', 'comix-rotate-270', _('Rotat_e 90 degrees CCW'), '<Shift>r', None, window.rotate_270),
+            ('flip_horiz', 'comix-flip-horizontal', _('Fli_p horizontally'), None, None, window.flip_horizontally),
+            ('flip_vert', 'comix-flip-vertical', _('Flip _vertically'), None, None, window.flip_vertically),
+            ('extract_page', None, _('Extract page...'), None, None, window.extract_page),
+            ('menu_zoom', 'comix-zoom', _('Manual _Zoom')), ('menu_recent', None, _('Open _recent')),
+            ('menu_bookmarks', None, _('_Bookmarks')), ('menu_toolbars', None, _('T_oolbars')),
+            ('menu_edit', None, _('_Edit')), ('menu_file', None, _('_File')),
+            ('menu_view', None, _('_View')), ('menu_go', None, _('_Go')),
+            ('menu_help', None, _('_Help')), ('menu_transform', 'comix-transform', _('_Transform')),
             ('expander', None, None, None, None, None)])
 
         self._actiongroup.add_toggle_actions([
-            ('fullscreen', None, _('_Fullscreen'),
-             'f', None, window.change_fullscreen),
-            ('double_page', 'comix-double-page', _('_Double page mode'),
-             'd', None, window.change_double_page),
-            ('toolbar', None, _('_Toolbar'),
-             None, None, window.change_toolbar_visibility),
-            ('menubar', None, _('_Menubar'),
-             None, None, window.change_menubar_visibility),
-            ('statusbar', None, _('St_atusbar'),
-             None, None, window.change_statusbar_visibility),
-            ('scrollbar', None, _('S_crollbars'),
-             None, None, window.change_scrollbar_visibility),
-            ('thumbnails', None, _('Th_umbnails'),
-             'F9', None, window.change_thumbnails_visibility),
-            ('hide all', None, _('H_ide all'),
-             'i', None, window.change_hide_all),
-            ('manga_mode', 'comix-manga', _('_Manga mode'),
-             'm', None, window.change_manga_mode),
-            ('keep_transformation', None, _('_Keep transformation'),
-             'k', None, window.change_keep_transformation),
-            ('slideshow', Gtk.STOCK_MEDIA_PLAY, _('Run _slideshow'),
-             '<Control>S', None, window.slideshow.toggle),
-            ('lens', 'comix-lens', _('Magnifying _glass'),
-             'g', None, window.glass.toggle)])
+            ('fullscreen', None, _('_Fullscreen'), 'f', None, window.change_fullscreen),
+            ('double_page', 'comix-double-page', _('_Double page mode'), 'd', None, window.change_double_page),
+            ('toolbar', None, _('_Toolbar'), None, None, window.change_toolbar_visibility),
+            ('menubar', None, _('_Menubar'), None, None, window.change_menubar_visibility),
+            ('statusbar', None, _('St_atusbar'), None, None, window.change_statusbar_visibility),
+            ('scrollbar', None, _('S_crollbars'), None, None, window.change_scrollbar_visibility),
+            ('thumbnails', None, _('Th_umbnails'), 'F9', None, window.change_thumbnails_visibility),
+            ('hide all', None, _('H_ide all'), 'i', None, window.change_hide_all),
+            ('manga_mode', 'comix-manga', _('_Manga mode'), 'm', None, window.change_manga_mode),
+            ('keep_transformation', None, _('_Keep transformation'), 'k', None, window.change_keep_transformation),
+            ('slideshow', Gtk.STOCK_MEDIA_PLAY, _('Run _slideshow'), '<Control>S', None, window.slideshow.toggle),
+            ('lens', 'comix-lens', _('Magnifying _glass'), 'g', None, window.glass.toggle)])
 
         # Note: Don't change the default value for the radio buttons unless
         # also fixing the code for setting the correct one on start-up.
         self._actiongroup.add_radio_actions([
-            ('best_fit_mode', 'comix-fitbest', _('_Best fit mode'),
-             'b', None, preferences.ZOOM_MODE_BEST),
-            ('fit_width_mode', 'comix-fitwidth', _('Fit _width mode'),
-             'w', None, preferences.ZOOM_MODE_WIDTH),
-            ('fit_height_mode', 'comix-fitheight', _('Fit _height mode'),
-             'h', None, preferences.ZOOM_MODE_HEIGHT),
-            ('fit_manual_mode', 'comix-fitmanual', _('M_anual zoom mode'),
-             'a', None, preferences.ZOOM_MODE_MANUAL)],
+            ('best_fit_mode', 'comix-fitbest', _('_Best fit mode'), 'b', None, preferences.ZOOM_MODE_BEST),
+            ('fit_width_mode', 'comix-fitwidth', _('Fit _width mode'), 'w', None, preferences.ZOOM_MODE_WIDTH),
+            ('fit_height_mode', 'comix-fitheight', _('Fit _height mode'), 'h', None, preferences.ZOOM_MODE_HEIGHT),
+            ('fit_manual_mode', 'comix-fitmanual', _('M_anual zoom mode'), 'a', None, preferences.ZOOM_MODE_MANUAL)],
                 3, window.change_zoom_mode)
 
         # Some actions added separately since they need extra arguments.
         self._actiongroup.add_actions([
-            ('about', Gtk.STOCK_ABOUT, _('_About'),
-             None, None, about.open_dialog),
-            ('comments', 'comix-comments', _('_View comments...'),
-             'c', None, comment.open_dialog),
-            ('edit_archive', Gtk.STOCK_EDIT, _('_Edit archive...'),
-             None, None, edit.open_dialog),
-            ('open', Gtk.STOCK_OPEN, _('_Open...'),
-             '<Control>o', None, filechooser.open_main_filechooser_dialog),
-            ('properties', Gtk.STOCK_PROPERTIES, _('_Properties'),
-             '<Alt>Return', None, properties.open_dialog),
-            ('enhance_image', 'comix-enhance-image', _('_Enhance image...'),
-             'e', None, enhance.open_dialog),
-            ('thumbnail_maintenance', 'comix-thumbnails',
-             _('_Thumbnail maintenance...'),
-             None, None, thumbremover.open_dialog),
-            ('preferences', Gtk.STOCK_PREFERENCES, _('Pr_eferences'),
-             None, None, preferences.open_dialog)], window)
+            ('about', Gtk.STOCK_ABOUT, _('_About'), None, None, about.open_dialog),
+            ('comments', 'comix-comments', _('_View comments...'), 'c', None, comment.open_dialog),
+            ('edit_archive', Gtk.STOCK_EDIT, _('_Edit archive...'), None, None, edit.open_dialog),
+            ('open', Gtk.STOCK_OPEN, _('_Open...'), '<Control>o', None, filechooser.open_main_filechooser_dialog),
+            ('properties', Gtk.STOCK_PROPERTIES, _('_Properties'), '<Alt>Return', None, properties.open_dialog),
+            ('enhance_image', 'comix-enhance-image', _('_Enhance image...'), 'e', None, enhance.open_dialog),
+            ('thumbnail_maintenance', 'comix-thumbnails', _('_Thumbnail maintenance...'), None, None, thumbremover.open_dialog),
+            ('preferences', Gtk.STOCK_PREFERENCES, _('Preferences'), None, None, preferences.open_dialog)], window)
 
         self._actiongroup.add_actions([
-            ('library', 'comix-library', _('_Library...'),
-             '<Control>l', None, library.open_dialog)], window.file_handler)
+            ('library', 'comix-library', _('_Library...'), '<Control>l', None, library.open_dialog)], window.file_handler)
 
         ui_description = """
         <ui>

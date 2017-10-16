@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 import os
 
-from gi.repository import Gtk, GObject
+from gi.repository import Gtk
 
 from src import encoding
 
@@ -12,7 +12,7 @@ _dialog = None
 
 # Compatibility
 try:
-    # noinspection PyUnresolvedReferences
+    # noinspection PyUnresolvedReferences,PyShadowingBuiltins
     range = xrange  # Python2
 except NameError:
     pass
@@ -21,9 +21,8 @@ except NameError:
 class _CommentsDialog(Gtk.Dialog):
 
     def __init__(self, window):
-        # GObject.GObject.__init__(self, _('Comments'), window, 0, (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE))  # TODO GObject.__init__ no longer takes arguments
-        GObject.GObject.__init__(self)
-        # self.set_has_separator(False)        # TODO Removed in GTK3
+        super(_CommentsDialog, self).__init__(title=_('Comments'), parent=window, flags=0)
+        self.add_buttons(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
         self.set_resizable(True)
         self.connect('response', _close_dialog)
         self.set_default_response(Gtk.ResponseType.CLOSE)

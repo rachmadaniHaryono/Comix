@@ -5,9 +5,9 @@ from __future__ import absolute_import
 try:
     from urllib import url2pathname, pathname2url  # Py2
 except ImportError:
+    # noinspection PyUnresolvedReferences,PyCompatibility
     from urllib.request import url2pathname, pathname2url  # Py3
 
-from gi.repository import GObject
 from gi.repository import Gtk
 
 from src import preferences
@@ -18,8 +18,7 @@ class RecentFilesMenu(Gtk.RecentChooserMenu):
     def __init__(self, ui, window):
         self._window = window
         self._manager = Gtk.RecentManager.get_default()
-        # GObject.GObject.__init__(self, self._manager) # TODO GObject.__init__ no longer takes arguments
-        GObject.GObject.__init__(self)
+        super(RecentFilesMenu, self).__init__()
 
         self.set_sort_type(Gtk.RecentSortType.MRU)
         self.set_show_tips(True)

@@ -49,12 +49,14 @@ def get_thumbnail(path, create=True, dst_dir=_thumbdir):
         info = Image.open(thumbpath).info
         try:
             mtime = int(info['Thumb::MTime'])
-        except Exception:
+        except Exception as e:
             mtime = -1
+            raise e
         if os.stat(path).st_mtime != mtime:
             return _get_new_thumbnail(path, create, dst_dir)
         return GdkPixbuf.Pixbuf.new_from_file(thumbpath)
-    except Exception:
+    except Exception as e:
+        raise e
         return None
 
 
@@ -157,14 +159,12 @@ def _create_thumbnail(path, dst_dir, image_path=None):
         'tEXt::Thumb::Image::Height': height,
         'tEXt::Software': 'Comix {}'.format(constants.VERSION)
     }
-    try:
-        if not os.path.isdir(dst_dir):
-            os.makedirs(dst_dir, 0o700)
-        pixbuf.save(thumbpath + '-comixtemp', 'png', tEXt_data)
-        os.rename(thumbpath + '-comixtemp', thumbpath)
-        os.chmod(thumbpath, 0o600)
-    except Exception:
-        print('! thumbnail.py: Could not write {}\n'.format(thumbpath))
+    if not os.path.isdir(dst_dir):
+        os.makedirs(dst_dir, 0o700)
+    pixbuf.savev(thumbpath + '-comixtemp', 'png', tEXt_data.keys(), tEXt_data.values())
+    os.rename(thumbpath + '-comixtemp', thumbpath)
+    os.chmod(thumbpath, 0o600)
+
     return pixbuf
 
 

@@ -2,7 +2,6 @@
 """status.py - Statusbar for main window."""
 from __future__ import absolute_import
 
-from gi.repository import GObject
 from gi.repository import Gtk
 
 from src import encoding
@@ -11,8 +10,7 @@ from src import encoding
 class Statusbar(Gtk.Statusbar):
 
     def __init__(self):
-        GObject.GObject.__init__(self)
-        # self.set_has_resize_grip(True) # TODO No longer available
+        super(Statusbar, self).__init__()
         self._page_info = ''
         self._resolution = ''
         self._root = ''

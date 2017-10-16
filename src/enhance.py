@@ -4,7 +4,6 @@ brightness etc.)
 """
 from __future__ import absolute_import
 
-from gi.repository import GObject
 from gi.repository import Gtk
 
 from src import histogram
@@ -43,16 +42,15 @@ class ImageEnhancer(object):
 
 
 class _EnhanceImageDialog(Gtk.Dialog):
-    """A Gtk.Dialog which allows modification of the values belonging to
+    """
+    A Gtk.Dialog which allows modification of the values belonging to
     an ImageEnhancer.
     """
 
     def __init__(self, window):
-        # GObject.GObject.__init__(self, _('Enhance image'), window, 0) # TODO GObject.__init__ no longer takes arguments
-        GObject.GObject.__init__(self)
+        super(_EnhanceImageDialog, self).__init__(title=_('Enhance image'), parent=window, flags=0)
         self.add_buttons(_('Defaults'), Gtk.ResponseType.NO,
                          Gtk.STOCK_OK, Gtk.ResponseType.OK)
-        # self.set_has_separator(False) # TODO Removed in GTK3
         self.set_resizable(False)
         self.connect('response', self._response)
         self.set_default_response(Gtk.ResponseType.OK)
@@ -68,7 +66,7 @@ class _EnhanceImageDialog(Gtk.Dialog):
         self._hist_image = Gtk.Image()
         self._hist_image.set_size_request(262, 170)
         vbox.pack_start(self._hist_image, True, True, 0)
-        # vbox.pack_start(Gtk.HSeparator(True, True, 0))
+        vbox.pack_start(Gtk.HSeparator.new(True, True, 0))
 
         hbox = Gtk.HBox(False, 4)
         vbox.pack_start(hbox, False, False, 2)
@@ -81,8 +79,7 @@ class _EnhanceImageDialog(Gtk.Dialog):
         label.set_alignment(1, 0.5)
         vbox_left.pack_start(label, True, False, 2)
         adj = Gtk.Adjustment(0.0, -1.0, 1.0, 0.01, 0.1)
-        # self._brightness_scale = Gtk.HScale(adj) # TODO GObject.__init__ no longer takes arguments
-        self._brightness_scale = Gtk.HScale()
+        self._brightness_scale = Gtk.HScale.new(adj)
         self._brightness_scale.set_digits(2)
         self._brightness_scale.set_value_pos(Gtk.PositionType.RIGHT)
         self._brightness_scale.connect('value-changed', self._change_values)
@@ -93,8 +90,7 @@ class _EnhanceImageDialog(Gtk.Dialog):
         label.set_alignment(1, 0.5)
         vbox_left.pack_start(label, True, False, 2)
         adj = Gtk.Adjustment(0.0, -1.0, 1.0, 0.01, 0.1)
-        # self._contrast_scale = Gtk.HScale(adj) # TODO GObject.__init__ no longer takes arguments
-        self._contrast_scale = Gtk.HScale()
+        self._contrast_scale = Gtk.HScale.new(adj)
         self._contrast_scale.set_digits(2)
         self._contrast_scale.set_value_pos(Gtk.PositionType.RIGHT)
         self._contrast_scale.connect('value-changed', self._change_values)
@@ -105,8 +101,7 @@ class _EnhanceImageDialog(Gtk.Dialog):
         label.set_alignment(1, 0.5)
         vbox_left.pack_start(label, True, False, 2)
         adj = Gtk.Adjustment(0.0, -1.0, 1.0, 0.01, 0.1)
-        # self._saturation_scale = Gtk.HScale(adj) # TODO GObject.__init__ no longer takes arguments
-        self._saturation_scale = Gtk.HScale()
+        self._saturation_scale = Gtk.HScale.new(adj)
         self._saturation_scale.set_digits(2)
         self._saturation_scale.set_value_pos(Gtk.PositionType.RIGHT)
         self._saturation_scale.connect('value-changed', self._change_values)
@@ -117,20 +112,17 @@ class _EnhanceImageDialog(Gtk.Dialog):
         label.set_alignment(1, 0.5)
         vbox_left.pack_start(label, True, False, 2)
         adj = Gtk.Adjustment(0.0, -1.0, 1.0, 0.01, 0.1)
-        # self._sharpness_scale = Gtk.HScale(adj) # TODO GObject.__init__ no longer takes arguments
-        self._sharpness_scale = Gtk.HScale()
+        self._sharpness_scale = Gtk.HScale.new(adj)
         self._sharpness_scale.set_digits(2)
         self._sharpness_scale.set_value_pos(Gtk.PositionType.RIGHT)
         self._sharpness_scale.connect('value-changed', self._change_values)
         # self._sharpness_scale.set_update_policy(Gtk.UPDATE_DELAYED) # TODO Removed in GTK3
         vbox_right.pack_start(self._sharpness_scale, True, False, 2)
 
-        # vbox.pack_start(Gtk.HSeparator(True, True, 0)) # TODO Removed in GTK3
+        vbox.pack_start(Gtk.HSeparator.new(True, True, 0))
 
-        self._autocontrast_button = \
-            Gtk.CheckButton(_('Automatically adjust contrast.'))
-        self._autocontrast_button.set_tooltip_text(
-                _('Automatically adjust contrast (both lightness and darkness), separately for each colour band.'))
+        self._autocontrast_button = Gtk.CheckButton(_('Automatically adjust contrast.'))
+        self._autocontrast_button.set_tooltip_text(_('Automatically adjust contrast (both lightness and darkness), separately for each colour band.'))
         vbox.pack_start(self._autocontrast_button, False, False, 2)
         self._autocontrast_button.connect('toggled', self._change_values)
 
@@ -141,8 +133,7 @@ class _EnhanceImageDialog(Gtk.Dialog):
         self._sharpness_scale.set_value(self._enhancer.sharpness - 1)
         self._autocontrast_button.set_active(self._enhancer.autocontrast)
         self._block = False
-        self._contrast_scale.set_sensitive(
-                not self._autocontrast_button.get_active())
+        self._contrast_scale.set_sensitive(not self._autocontrast_button.get_active())
 
         self.show_all()
 

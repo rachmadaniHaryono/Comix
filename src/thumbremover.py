@@ -8,10 +8,10 @@ import os
 try:
     from urllib import url2pathname  # Py2
 except ImportError:
+    # noinspection PyUnresolvedReferences,PyCompatibility
     from urllib.request import url2pathname  # Py3
 
 from PIL import Image
-from gi.repository import GObject
 from gi.repository import Gtk
 from gi.repository import Pango
 
@@ -27,12 +27,11 @@ class _ThumbnailMaintenanceDialog(Gtk.Dialog):
 
     def __init__(self, window):
         self._num_thumbs = 0
-        # GObject.GObject.__init__(self, _('Thumbnail maintenance'), window, 0, (Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)) # TODO GObject.__init__ no longer takes arguments
-        GObject.GObject.__init__(self)
+        super(_ThumbnailMaintenanceDialog, self).__init__(title=_('Thumbnail maintenance'), parent=window, flags=0)
+        self.add_buttons(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
         button = self.add_button(_('Cleanup'), Gtk.ResponseType.OK)
         button.set_image(Gtk.Image.new_from_stock(
                 Gtk.STOCK_CLEAR, Gtk.IconSize.BUTTON))
-        # self.set_has_separator(False) # TODO Removed in GTK3
         self.set_resizable(False)
         self.set_border_width(4)
         self.connect('response', self._response)
@@ -130,10 +129,9 @@ class _ThumbnailRemover(Gtk.Dialog):
     def __init__(self, parent, total_thumbs):
         self._total_thumbs = total_thumbs
         self._destroy = False
-        # GObject.GObject.__init__(self, _('Removing thumbnails'), parent, 0, (Gtk.STOCK_STOP, Gtk.ResponseType.CLOSE)) # TODO GObject.__init__ no longer takes arguments
-        GObject.GObject.__init__(self)
+        super(_ThumbnailRemover, self).__init__(title=_('Removing thumbnails'), parent=parent, flags=0)
+        self.add_buttons(Gtk.STOCK_STOP, Gtk.ResponseType.CLOSE)
         self.set_size_request(400, -1)
-        # self.set_has_separator(False) # TODO Removed in GTK3
         self.set_resizable(False)
         self.set_border_width(4)
         self.connect('response', self._response)
