@@ -1,0 +1,57 @@
+[tool]
+
+[tool.poetry]
+name = "Comix"
+version = "4.1.12"
+description = "user-friendly, customizable image viewer"
+license = "GNU General Public License (GPL)"
+keywords = ["comic", "book", "image", "viewer", "zip", "rar", "tar", "cbz", "cbr", "cbt", "gtk"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: X11 Applications :: GTK",
+  "Intended Audience :: End Users/Desktop",
+  "License :: OSI Approved :: GNU General Public License (GPL)",
+  "Natural Language :: Catalan",
+  "Natural Language :: Chinese (Simplified)",
+  "Natural Language :: Chinese (Traditional)",
+  "Natural Language :: Dutch",
+  "Natural Language :: English",
+  "Natural Language :: French",
+  "Natural Language :: German",
+  "Natural Language :: Greek",
+  "Natural Language :: Italian",
+  "Natural Language :: Polish",
+  "Natural Language :: Portuguese (Brazilian)",
+  "Natural Language :: Spanish",
+  "Natural Language :: Swedish",
+  "Operating System :: POSIX :: BSD :: FreeBSD",
+  "Operating System :: POSIX :: BSD :: NetBSD",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3.6",
+  "Programming Language :: Python",
+  "Topic :: Multimedia :: Graphics :: Viewers"
+  ]
+homepage = "https://github.com/Joacchim/Comix"
+authors = ["Pontus Ekberg <herrekberg@users.sourceforge.net>",]
+maintainers = ["HerrEkberg"]
+
+[tool.poetry.dependencies]
+python = ">=3.7,<4"
+"vext.gi" = {version = "^0.7.4", extras = ["vext"]}
+gobject = {version = "^0.1.0", extras = ["gi"]}
+Pillow = "^9.0.0"
+PyGObject = {version = "^3.42.0", extras = ["gi"]}
+six = "^1.16.0"
+
+[tool.poetry.dev-dependencies]
+mypy = "^0.931"
+flake8 = "^4.0.1"
+pytest = "^6.2.5"
+pre-commit = "^2.17.0"
+
+[tool.poetry.scripts]
+comix = 'src.comix:run'
+comicthumb = 'src.comicthumb:main'
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/Joacchim/Comix/issues"
