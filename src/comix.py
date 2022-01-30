@@ -86,11 +86,11 @@ def print_help():
     sys.exit(1)
 
 
-def run():
+def run(argv):
     """Run the program."""
     # Use gettext translations as found in the source dir, otherwise based on
     # the install path.
-    exec_path = os.path.abspath(sys.argv[0])
+    exec_path = os.path.abspath(argv[0])
     base_dir = os.path.dirname(os.path.dirname(exec_path))
     if os.path.isdir(os.path.join(base_dir, 'messages')):
         gettext.install('comix', os.path.join(base_dir, 'messages'),
@@ -105,8 +105,9 @@ def run():
     open_path = None
     open_page = 1
     try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], 'fhla',
-                                       ['fullscreen', 'help', 'library', 'animate-gifs'])
+        opts, args = getopt.gnu_getopt(
+            argv[1:], "fhla", ["fullscreen", "help", "library", "animate-gifs"]
+        )
     except getopt.GetoptError:
         print_help()
     for opt, value in opts:
@@ -150,4 +151,4 @@ def run():
 
 
 if __name__ == '__main__':
-    run()
+    run(argv=sys.argv)
