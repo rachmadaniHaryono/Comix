@@ -1,14 +1,16 @@
 # coding=utf-8
 """main.py - Main window."""
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 import os
 import shutil
 import sys
 import threading
 
-import gobject
-import gtk
+from gi.repository import GObject
+from gi.repository import Gdk
+from gi.repository import GdkPixbuf
+from gi.repository import Gtk
 
 from src import cursor
 from src import encoding
@@ -25,15 +27,14 @@ from src import ui
 from src.preferences import prefs
 
 
-class MainWindow(gtk.Window):
-    """The Comix main window, is created at start and terminates the
+class MainWindow(Gtk.Window):
+    """
+    The Comix main window, is created at start and terminates the
     program when closed.
     """
 
-    def __init__(self, animate_gifs=False, fullscreen=False, show_library=False, open_path=None,
-                 open_page=1):
-        gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
-
+    def __init__(self, animate_gifs=False, fullscreen=False, show_library=False, open_path=None, open_page=1):
+        super(MainWindow, self).__init__(type=Gtk.WindowType.TOPLEVEL)
         # ----------------------------------------------------------------
         # Attributes
         # ----------------------------------------------------------------
@@ -56,20 +57,21 @@ class MainWindow(gtk.Window):
         self.enhancer = enhance.ImageEnhancer(self)
         self.glass = lens.MagnifyingGlass(self)
         self.ui_manager = ui.MainUI(self)
+
         self.menubar = self.ui_manager.get_widget('/Menu')
         self.toolbar = self.ui_manager.get_widget('/Tool')
         self.popup = self.ui_manager.get_widget('/Popup')
         self.actiongroup = self.ui_manager.get_action_groups()[0]
-        self.left_image = gtk.Image()
-        self.right_image = gtk.Image()
+        self.left_image = Gtk.Image()
+        self.right_image = Gtk.Image()
 
-        self._image_box = gtk.HBox(False, 2)
-        self._main_layout = gtk.Layout()
+        self._image_box = Gtk.HBox(False, 2)
+        self._main_layout = Gtk.Layout()
         self._event_handler = event.EventHandler(self)
         self._vadjust = self._main_layout.get_vadjustment()
         self._hadjust = self._main_layout.get_hadjustment()
-        self._vscroll = gtk.VScrollbar(self._vadjust)
-        self._hscroll = gtk.HScrollbar(self._hadjust)
+        self._vscroll = Gtk.VScrollbar(self._vadjust)
+        self._hscroll = Gtk.HScrollbar(self._hadjust)
 
         # ----------------------------------------------------------------
         # Setup
@@ -80,10 +82,9 @@ class MainWindow(gtk.Window):
 
         # This is a hack to get the focus away from the toolbar so that
         # we don't activate it with space or some other key (alternative?)
-        self.toolbar.set_focus_child(
-                self.ui_manager.get_widget('/Tool/expander'))
-        self.toolbar.set_style(gtk.TOOLBAR_ICONS)
-        self.toolbar.set_icon_size(gtk.ICON_SIZE_LARGE_TOOLBAR)
+        self.toolbar.set_focus_child(self.ui_manager.get_widget('/Tool/expander'))
+        self.toolbar.set_style(Gtk.ToolbarStyle.ICONS)
+        self.toolbar.set_icon_size(Gtk.IconSize.LARGE_TOOLBAR)
 
         self._image_box.add(self.left_image)
         self._image_box.add(self.right_image)
@@ -97,21 +98,28 @@ class MainWindow(gtk.Window):
         self._hadjust.step_increment = 15
         self._hadjust.page_increment = 1
 
-        table = gtk.Table(2, 2, False)
-        table.attach(self.thumbnailsidebar, 0, 1, 2, 5, gtk.FILL,
-                     gtk.FILL | gtk.EXPAND, 0, 0)
-        table.attach(self._main_layout, 1, 2, 2, 3, gtk.FILL | gtk.EXPAND,
-                     gtk.FILL | gtk.EXPAND, 0, 0)
-        table.attach(self._vscroll, 2, 3, 2, 3, gtk.FILL | gtk.SHRINK,
-                     gtk.FILL | gtk.SHRINK, 0, 0)
-        table.attach(self._hscroll, 1, 2, 4, 5, gtk.FILL | gtk.SHRINK,
-                     gtk.FILL, 0, 0)
-        table.attach(self.menubar, 0, 3, 0, 1, gtk.FILL | gtk.SHRINK,
-                     gtk.FILL, 0, 0)
-        table.attach(self.toolbar, 0, 3, 1, 2, gtk.FILL | gtk.SHRINK,
-                     gtk.FILL, 0, 0)
-        table.attach(self.statusbar, 0, 3, 5, 6, gtk.FILL | gtk.SHRINK,
-                     gtk.FILL, 0, 0)
+        table = Gtk.Table(2, 2, False)
+        table.attach(self.thumbnailsidebar, 0, 1, 2, 5,
+                     Gtk.AttachOptions.FILL,
+                     Gtk.AttachOptions.FILL | Gtk.AttachOptions.EXPAND, 0, 0)
+        table.attach(self._main_layout, 1, 2, 2, 3,
+                     Gtk.AttachOptions.FILL | Gtk.AttachOptions.EXPAND,
+                     Gtk.AttachOptions.FILL | Gtk.AttachOptions.EXPAND, 0, 0)
+        table.attach(self._vscroll, 2, 3, 2, 3,
+                     Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK,
+                     Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK, 0, 0)
+        table.attach(self._hscroll, 1, 2, 4, 5,
+                     Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK,
+                     Gtk.AttachOptions.FILL, 0, 0)
+        table.attach(self.menubar, 0, 3, 0, 1,
+                     Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK,
+                     Gtk.AttachOptions.FILL, 0, 0)
+        table.attach(self.toolbar, 0, 3, 1, 2,
+                     Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK,
+                     Gtk.AttachOptions.FILL, 0, 0)
+        table.attach(self.statusbar, 0, 3, 5, 6,
+                     Gtk.AttachOptions.FILL | Gtk.AttachOptions.SHRINK,
+                     Gtk.AttachOptions.FILL, 0, 0)
 
         if prefs['default double page']:
             self.actiongroup.get_action('double_page').activate()
@@ -165,19 +173,20 @@ class MainWindow(gtk.Window):
         self._main_layout.show()
         self._display_active_widgets()
 
-        self._main_layout.set_events(gtk.gdk.BUTTON1_MOTION_MASK |
-                                     gtk.gdk.BUTTON2_MOTION_MASK |
-                                     gtk.gdk.BUTTON_PRESS_MASK |
-                                     gtk.gdk.BUTTON_RELEASE_MASK |
-                                     gtk.gdk.POINTER_MOTION_MASK)
-        self._main_layout.drag_dest_set(gtk.DEST_DEFAULT_ALL,
-                                        [('text/uri-list', 0, 0)],
-                                        gtk.gdk.ACTION_COPY |
-                                        gtk.gdk.ACTION_MOVE)
+        self._main_layout.set_events(Gdk.EventMask.BUTTON1_MOTION_MASK |
+                                     Gdk.EventMask.BUTTON2_MOTION_MASK |
+                                     Gdk.EventMask.BUTTON_PRESS_MASK |
+                                     Gdk.EventMask.BUTTON_RELEASE_MASK |
+                                     Gdk.EventMask.POINTER_MOTION_MASK)
+
+        self._main_layout.drag_dest_set(Gtk.DestDefaults.ALL,
+                                        [Gtk.TargetEntry.new('text/uri-list', 0, 0)],
+                                        Gdk.DragAction.COPY | Gdk.DragAction.MOVE)
 
         self.connect('delete_event', self.terminate_program)
         self.connect('key_press_event', self._event_handler.key_press_event)
         self.connect('configure_event', self._event_handler.resize_event)
+
         self._main_layout.connect('button_release_event',
                                   self._event_handler.mouse_release_event)
         self._main_layout.connect('scroll_event',
@@ -191,6 +200,7 @@ class MainWindow(gtk.Window):
 
         self.ui_manager.set_sensitivities()
         self.show()
+
         if open_path is not None:
             self.file_handler.open_file(open_path, open_page)
         if show_library:
@@ -201,8 +211,8 @@ class MainWindow(gtk.Window):
         """
         if not self._waiting_for_redraw:  # Don't stack up redraws.
             self._waiting_for_redraw = True
-            gobject.idle_add(self._draw_image, at_bottom, scroll,
-                             priority=gobject.PRIORITY_HIGH_IDLE)
+            GObject.idle_add(self._draw_image, at_bottom, scroll,
+                             priority=GObject.PRIORITY_HIGH_IDLE)
 
     def _draw_image(self, at_bottom, scroll):
         def pixb_process(pixbuf):
@@ -238,8 +248,8 @@ class MainWindow(gtk.Window):
             if self.is_manga_mode:
                 right_pixbuf, left_pixbuf = left_pixbuf, right_pixbuf
             # instead of modifying returns, just do two extra calls here
-            left_animated = isinstance(left_pixbuf, gtk.gdk.PixbufAnimation)
-            right_animated = isinstance(right_pixbuf, gtk.gdk.PixbufAnimation)
+            left_animated = isinstance(left_pixbuf, GdkPixbuf.PixbufAnimation)
+            right_animated = isinstance(right_pixbuf, GdkPixbuf.PixbufAnimation)
             left_unscaled_x = left_pixbuf.get_width()
             left_unscaled_y = left_pixbuf.get_height()
             right_unscaled_x = right_pixbuf.get_width()
@@ -325,7 +335,7 @@ class MainWindow(gtk.Window):
         else:
             pixbuf = self.file_handler.get_pixbufs(single=True)
             # instead of modifying returns, just do an extra single call here
-            animated = isinstance(pixbuf, gtk.gdk.PixbufAnimation)
+            animated = isinstance(pixbuf, GdkPixbuf.PixbufAnimation)
             unscaled_x = pixbuf.get_width()
             unscaled_y = pixbuf.get_height()
 
@@ -370,7 +380,7 @@ class MainWindow(gtk.Window):
                 bg_colour = image.get_most_common_edge_colour(pixbuf)
                 self.set_bg_colour(bg_colour)
 
-        self._image_box.window.freeze_updates()
+        # self._image_box.window.freeze_updates()
         self._main_layout.move(self._image_box, max(0, x_padding),
                                max(0, y_padding))
         self.left_image.show()
@@ -378,19 +388,19 @@ class MainWindow(gtk.Window):
             self.right_image.show()
         else:
             self.right_image.hide()
-        self._main_layout.set_size(*self._image_box.size_request())
+        self._main_layout.set_size(self._image_box.size_request().height, self._image_box.size_request().width)
         if scroll:
             if at_bottom:
                 self.scroll_to_fixed(horiz='endsecond', vert='bottom')
             else:
                 self.scroll_to_fixed(horiz='startfirst', vert='top')
-        self._image_box.window.thaw_updates()
+        # self._image_box.window.thaw_updates()
 
         self.statusbar.set_root(self.file_handler.get_base_filename())
         self.statusbar.update()
         self.update_title()
-        while gtk.events_pending():
-            gtk.main_iteration(False)
+        while Gtk.events_pending():
+            Gtk.main_iteration()
         enhance.draw_histogram(self.left_image)
         self.file_handler.do_cacheing()
         self.thumbnailsidebar.load_thumbnails()
@@ -543,8 +553,8 @@ class MainWindow(gtk.Window):
         old_hadjust = self._hadjust.get_value()
         old_vadjust = self._vadjust.get_value()
         visible_width, visible_height = self.get_visible_area_size()
-        hadjust_upper = max(0, self._hadjust.upper - visible_width)
-        vadjust_upper = max(0, self._vadjust.upper - visible_height)
+        hadjust_upper = max(0, self._hadjust.get_upper() - visible_width)
+        vadjust_upper = max(0, self._vadjust.get_upper() - visible_height)
         hadjust_lower = 0
         if bound is not None and self.is_manga_mode:
             bound = {'first': 'second', 'second': 'first'}[bound]
@@ -591,8 +601,8 @@ class MainWindow(gtk.Window):
         new_vadjust = old_vadjust
         new_hadjust = old_hadjust
         visible_width, visible_height = self.get_visible_area_size()
-        vadjust_upper = self._vadjust.upper - visible_height
-        hadjust_upper = self._hadjust.upper - visible_width
+        vadjust_upper = self._vadjust.get_upper() - visible_height
+        hadjust_upper = self._hadjust.get_upper() - visible_width
 
         if vert == 'top':
             new_vadjust = 0
@@ -656,7 +666,7 @@ class MainWindow(gtk.Window):
             return True
         width, height = self.get_visible_area_size()
         if self.is_manga_mode:
-            return (self._hadjust.get_value() >= self._hadjust.upper - width or
+            return (self._hadjust.get_value() >= self._hadjust.get_upper() - width or
                     self._hadjust.get_value() > self.left_image.size_request()[0])
         else:
             return (self._hadjust.get_value() == 0 or
@@ -686,21 +696,21 @@ class MainWindow(gtk.Window):
         width, height = self.get_size()
         if not prefs['hide all'] and not (self.is_fullscreen and prefs['hide all in fullscreen']):
             if prefs['show toolbar']:
-                height -= self.toolbar.size_request()[1]
+                height -= self.toolbar.size_request().height
             if prefs['show statusbar']:
-                height -= self.statusbar.size_request()[1]
+                height -= self.statusbar.size_request().height
             if prefs['show thumbnails']:
                 width -= self.thumbnailsidebar.get_width()
             if prefs['show menubar']:
-                height -= self.menubar.size_request()[1]
+                height -= self.menubar.size_request().height
             if prefs['show scrollbar']:
                 if self.zoom_mode == preferences.ZOOM_MODE_WIDTH:
-                    width -= self._vscroll.size_request()[0]
+                    width -= self._vscroll.size_request().width
                 elif self.zoom_mode == preferences.ZOOM_MODE_HEIGHT:
-                    height -= self._hscroll.size_request()[1]
+                    height -= self._hscroll.size_request().height
                 elif self.zoom_mode == preferences.ZOOM_MODE_MANUAL:
-                    width -= self._vscroll.size_request()[0]
-                    height -= self._hscroll.size_request()[1]
+                    width -= self._vscroll.size_request().width
+                    height -= self._hscroll.size_request().height
         return width, height
 
     def get_layout_pointer_position(self):
@@ -717,33 +727,29 @@ class MainWindow(gtk.Window):
         probably use the cursor_handler instead of using this method
         directly.
         """
-        self._main_layout.window.set_cursor(mode)
+        # self._main_layout.window.set_cursor(mode)
         return False
 
     def update_title(self):
         """Set the title acording to current state."""
         if self.displayed_double():
-            title = encoding.to_unicode('[%d,%d / %d]  %s - Comix' % (
-                self.file_handler.get_current_page(),
-                self.file_handler.get_current_page() + 1,
-                self.file_handler.get_number_of_pages(),
-                self.file_handler.get_pretty_current_filename()))
+            title = encoding.to_unicode('[{:d},{:d} / {:d}]  {} - Comix'.format(self.file_handler.get_current_page(),
+                                                                                self.file_handler.get_current_page() + 1,
+                                                                                self.file_handler.get_number_of_pages(),
+                                                                                self.file_handler.get_pretty_current_filename()))
         else:
-            title = encoding.to_unicode('[%d / %d]  %s - Comix' % (
-                self.file_handler.get_current_page(),
-                self.file_handler.get_number_of_pages(),
-                self.file_handler.get_pretty_current_filename()))
+            title = encoding.to_unicode('[{:d} / {:d}]  {} - Comix'.format(self.file_handler.get_current_page(),
+                                                                           self.file_handler.get_number_of_pages(),
+                                                                           self.file_handler.get_pretty_current_filename()))
         if self.slideshow.is_running():
-            title = '[%s] %s' % (_('SLIDESHOW'), title)
+            title = '[{}] {}'.format(_('SLIDESHOW'), title)
         self.set_title(title)
 
     def set_bg_colour(self, colour):
         """Set the background colour to <colour>. Colour is a sequence in the
         format (r, g, b). Values are 16-bit.
         """
-        self._main_layout.modify_bg(gtk.STATE_NORMAL,
-                                    gtk.gdk.colormap_get_system().alloc_color(gtk.gdk.Color(
-                                            colour[0], colour[1], colour[2]), False, True))
+        self._main_layout.modify_bg(Gtk.StateType.NORMAL, Gdk.Color(colour[0], colour[1], colour[2]))
 
     def _display_active_widgets(self):
         """Hide and/or show main window widgets depending on the current
@@ -753,44 +759,45 @@ class MainWindow(gtk.Window):
             if prefs['show toolbar']:
                 self.toolbar.show_all()
             else:
-                self.toolbar.hide_all()
+                self.toolbar.hide()
             if prefs['show statusbar']:
                 self.statusbar.show_all()
             else:
-                self.statusbar.hide_all()
+                self.statusbar.hide()
             if prefs['show menubar']:
                 self.menubar.show_all()
             else:
-                self.menubar.hide_all()
+                self.menubar.hide()
             if prefs['show scrollbar'] and self.zoom_mode == preferences.ZOOM_MODE_WIDTH:
                 self._vscroll.show_all()
-                self._hscroll.hide_all()
+                self._hscroll.hide()
             elif prefs['show scrollbar'] and self.zoom_mode == preferences.ZOOM_MODE_HEIGHT:
-                self._vscroll.hide_all()
+                self._vscroll.hide()
                 self._hscroll.show_all()
             elif prefs['show scrollbar'] and self.zoom_mode == preferences.ZOOM_MODE_MANUAL:
                 self._vscroll.show_all()
                 self._hscroll.show_all()
             else:
-                self._vscroll.hide_all()
-                self._hscroll.hide_all()
+                pass
+                self._vscroll.hide()
+                self._hscroll.hide()
             if prefs['show thumbnails']:
                 self.thumbnailsidebar.show()
             else:
                 self.thumbnailsidebar.hide()
         else:
-            self.toolbar.hide_all()
-            self.menubar.hide_all()
-            self.statusbar.hide_all()
+            self.toolbar.hide()
+            self.menubar.hide()
+            self.statusbar.hide()
             self.thumbnailsidebar.hide()
-            self._vscroll.hide_all()
-            self._hscroll.hide_all()
+            self._vscroll.hide()
+            self._hscroll.hide()
 
     def terminate_program(self, *args):
         """Run clean-up tasks and exit the program."""
         self.hide()
-        if gtk.main_level() > 0:
-            gtk.main_quit()
+        if Gtk.main_level() > 0:
+            Gtk.main_quit()
         if prefs['auto load last file'] and self.file_handler.file_loaded:
             prefs['path to last file'] = self.file_handler.get_real_path()
             prefs['page of last file'] = self.file_handler.get_current_page()
@@ -800,7 +807,7 @@ class MainWindow(gtk.Window):
         self.file_handler.cleanup()
         preferences.write_preferences_file()
         self.ui_manager.bookmarks.write_bookmarks_file()
-        # This hack is to avoid Python issue #1856.
+        # This hack is to avoid Python issue #1856. # Fixed in 3.2+
         for thread in threading.enumerate():
             if thread is not threading.currentThread():
                 thread.join()
@@ -817,9 +824,9 @@ class MainWindow(gtk.Window):
         else:
             suggested_name = os.path.split(self.file_handler.get_path_to_page())[-1]
 
-        save_dialog = gtk.FileChooserDialog(_('Extract page...'), self,
-                                            gtk.FILE_CHOOSER_ACTION_SAVE, (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
-                                                                           gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT))
+        save_dialog = Gtk.FileChooserDialog(_('Extract page...'), self,
+                                            Gtk.FileChooserAction.SAVE, (Gtk.STOCK_OK, Gtk.ResponseType.ACCEPT,
+                                                                         Gtk.STOCK_CANCEL, Gtk.ResponseType.REJECT))
         save_dialog.set_current_name(suggested_name.encode('utf-8'))
 
         # ? filechooser.py:93 uses `try`. But can this really fail?
@@ -827,7 +834,7 @@ class MainWindow(gtk.Window):
             save_dialog.set_current_folder(
                     prefs['last path in save filechooser'])
 
-        if save_dialog.run() == gtk.RESPONSE_ACCEPT and save_dialog.get_filename():
+        if save_dialog.run() == Gtk.ResponseType.ACCEPT and save_dialog.get_filename():
             shutil.copy(self.file_handler.get_path_to_page(),
                         save_dialog.get_filename().decode('utf-8'))
             prefs['last path in save filechooser'] = \

@@ -14,11 +14,12 @@ Supported formats: ZIP, RAR, 7Z, mobi and tar (.cbz, .cbr, .cb7, .cbt)
 
 Usage: comicthumb INFILE OUTFILE [SIZE]
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 import sys
 
 try:
+    # noinspection PyUnresolvedReferences
     from PIL import Image
 except ImportError:
     print('! Could not import the Image module (PIL).')

@@ -2,15 +2,15 @@
 """archive.py - Archive handling (extract/create) for Comix."""
 from __future__ import absolute_import
 
-import cStringIO
 import os
 import re
 import sys
 import tarfile
 import threading
 import zipfile
+from io import StringIO
 
-import gtk
+from gi.repository import Gtk
 
 try:
     from py7zlib import Archive7z
@@ -71,8 +71,8 @@ class Extractor(object):
                 _rar_exec = _get_rar_exec()
                 if _rar_exec is None:
                     print('! Could not find RAR file extractor.')
-                    dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_WARNING,
-                                               gtk.BUTTONS_CLOSE,
+                    dialog = Gtk.MessageDialog(None, 0, Gtk.MessageType.WARNING,
+                                               Gtk.ButtonsType.CLOSE,
                                                _("Could not find RAR file extractor!"))
                     dialog.format_secondary_markup(_("You need either the <i>rar</i> or the"
                                                      " <i>unrar</i> program installed in order "
@@ -113,8 +113,8 @@ class Extractor(object):
                 proc.wait()
 
             if not _7z_exec and not Archive7z:
-                dialog = gtk.MessageDialog(None, 0, gtk.MESSAGE_WARNING,
-                                           gtk.BUTTONS_CLOSE,
+                dialog = Gtk.MessageDialog(None, 0, Gtk.MessageType.WARNING,
+                                           Gtk.ButtonsType.CLOSE,
                                            _("Could not find 7Z file extractor!"))
                 dialog.format_secondary_markup(_("You need either the <i>pylzma</i> "
                                                  "or the <i>p7zip</i> program installed "
@@ -351,25 +351,25 @@ class Extractor(object):
         """
 
         if os.path.exists(os.path.join(self._dst, chosen)):
-            cStringIO.StringIO(open(os.path.join(self._dst, chosen), 'rb').read())
+            StringIO(open(os.path.join(self._dst, chosen), 'rb').read())
 
         if self._type == ZIP:
-            return cStringIO.StringIO(self._zfile.read(chosen))
+            return StringIO(self._zfile.read(chosen))
         elif self._type in [TAR, GZIP, BZIP2]:
-            return cStringIO.StringIO(self._tfile.extractfile(chosen).read())
+            return StringIO(self._tfile.extractfile(chosen).read())
         elif self._type == RAR:
             proc = process.Process([_rar_exec, 'p', '-inul', '-p-', '--',
                                     self._src, chosen])
             fobj = proc.spawn()
-            return cStringIO.StringIO(fobj.read())
+            return StringIO(fobj.read())
         elif self._type == SEVENZIP:
             if Archive7z is not None:
-                return cStringIO.StringIO(self._szfile.getmember(chosen).read())
+                return StringIO(self._szfile.getmember(chosen).read())
             elif _7z_exec is not None:
                 proc = process.Process([_7z_exec, 'e', '-bd', '-p-', '-so',
                                         self._src, chosen])
                 fobj = proc.spawn()
-                return cStringIO.StringIO(fobj.read())
+                return StringIO(fobj.read())
 
 
 class Packer(object):
@@ -421,10 +421,9 @@ class Packer(object):
             print('! Could not create archive {}'.format(self._archive_path))
             return
         used_names = []
-        pattern = '%%0%dd - %s%%s' % (len(str(len(self._image_files))),
-                                      self._base_name)
+        pattern = '{{:0{}d}} - {}{{}}'.format(len(str(len(self._image_files))), self._base_name)
         for i, path in enumerate(self._image_files):
-            filename = pattern % (i + 1, os.path.splitext(path)[1])
+            filename = pattern.format(i + 1, os.path.splitext(path)[1])
             try:
                 zfile.write(path, filename, zipfile.ZIP_STORED)
             except Exception:
@@ -439,7 +438,7 @@ class Packer(object):
         for path in self._other_files:
             filename = os.path.basename(path)
             while filename in used_names:
-                filename = '_%s' % filename
+                filename = '_{}'.format(filename)
             try:
                 zfile.write(path, filename, zipfile.ZIP_DEFLATED)
             except Exception:
@@ -509,7 +508,7 @@ def get_archive_info(path):
         return None
     files = extractor.get_files()
     extractor.close()
-    num_pages = len(filter(image_re.search, files))
+    num_pages = len([f for f in files if image_re.search(f)])
     size = os.stat(path).st_size
     return mime, num_pages, size
 

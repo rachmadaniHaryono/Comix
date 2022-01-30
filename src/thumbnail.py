@@ -4,17 +4,20 @@ freedesktop.org "standard" at http://jens.triq.net/thumbnail-spec/
 
 Only normal size (i.e. 128x128 px) thumbnails are supported.
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 import os
 import re
 import shutil
 import tempfile
 from hashlib import md5
-from urllib import pathname2url
+try:
+    from urllib import pathname2url  # Py2
+except ImportError:
+    from urllib.request import pathname2url  # Py3
 
-import gtk
 from PIL import Image
+from gi.repository import GdkPixbuf
 
 from src import archive
 from src import constants
@@ -46,12 +49,14 @@ def get_thumbnail(path, create=True, dst_dir=_thumbdir):
         info = Image.open(thumbpath).info
         try:
             mtime = int(info['Thumb::MTime'])
-        except Exception:
+        except Exception as e:
             mtime = -1
+            raise e
         if os.stat(path).st_mtime != mtime:
             return _get_new_thumbnail(path, create, dst_dir)
-        return gtk.gdk.pixbuf_new_from_file(thumbpath)
-    except Exception:
+        return GdkPixbuf.Pixbuf.new_from_file(thumbpath)
+    except Exception as e:
+        raise e
         return None
 
 
@@ -95,7 +100,7 @@ def _get_new_archive_thumbnail(path, dst_dir):
     if wanted is None:
         """ Then check for subarchives and extract only the first... """
         sub_re = re.compile(r'\.(tar|gz|bz2|rar|zip|7z|mobi)\s*$', re.I)
-        subs = filter(sub_re.search, files)
+        subs = [f for f in files if sub_re.search(f)]
         if subs:
             subarchive = extractor.set_files([subs[0]])
             extractor.extract()
@@ -134,10 +139,10 @@ def _create_thumbnail(path, dst_dir, image_path=None):
     pixbuf = _get_pixbuf128(image_path)
     if pixbuf is None:
         return None
-    mime, width, height = gtk.gdk.pixbuf_get_file_info(image_path)
+    mime, width, height = GdkPixbuf.Pixbuf.get_file_info(image_path)
     if width <= 128 and height <= 128:
         return pixbuf
-    mime = mime['mime_types'][0]
+    mime = mime.get_mime_types()[0]
     uri = 'file://' + pathname2url(os.path.normpath(path))
     thumbpath = _uri_to_thumbpath(uri, dst_dir)
     stat = os.stat(path)
@@ -152,16 +157,14 @@ def _create_thumbnail(path, dst_dir, image_path=None):
         'tEXt::Thumb::Mimetype': mime,
         'tEXt::Thumb::Image::Width': width,
         'tEXt::Thumb::Image::Height': height,
-        'tEXt::Software': 'Comix %s' % constants.VERSION
+        'tEXt::Software': 'Comix {}'.format(constants.VERSION)
     }
-    try:
-        if not os.path.isdir(dst_dir):
-            os.makedirs(dst_dir, 0o700)
-        pixbuf.save(thumbpath + '-comixtemp', 'png', tEXt_data)
-        os.rename(thumbpath + '-comixtemp', thumbpath)
-        os.chmod(thumbpath, 0o600)
-    except Exception:
-        print('! thumbnail.py: Could not write {}\n'.format(thumbpath))
+    if not os.path.isdir(dst_dir):
+        os.makedirs(dst_dir, 0o700)
+    pixbuf.savev(thumbpath + '-comixtemp', 'png', tEXt_data.keys(), tEXt_data.values())
+    os.rename(thumbpath + '-comixtemp', thumbpath)
+    os.chmod(thumbpath, 0o600)
+
     return pixbuf
 
 
@@ -174,7 +177,7 @@ def _uri_to_thumbpath(uri, dst_dir):
     """Return the full path to the thumbnail for <uri> when <dst_dir> the base
     thumbnail directory.
     """
-    md5hash = md5(uri).hexdigest()
+    md5hash = md5(uri.encode()).hexdigest()
     thumbpath = os.path.join(dst_dir, md5hash + '.png')
     return thumbpath
 
@@ -182,15 +185,15 @@ def _uri_to_thumbpath(uri, dst_dir):
 def _get_pixbuf128(path):
     try:
         if "gif" not in path[-3:].lower():
-            return gtk.gdk.pixbuf_new_from_file_at_size(path, 128, 128)
+            return GdkPixbuf.Pixbuf.new_from_file_at_size(path, 128, 128)
         else:
-            thumb = gtk.gdk.PixbufAnimation(path).get_static_image()
+            thumb = GdkPixbuf.PixbufAnimation(path).get_static_image()
             width = thumb.get_width()
             height = thumb.get_height()
             if width > height:
-                return thumb.scale_simple(128, int(max(height * 128 / width, 1)), gtk.gdk.INTERP_TILES)
+                return thumb.scale_simple(128, int(max(height * 128 / width, 1)), GdkPixbuf.InterpType.TILES)
             else:
-                return thumb.scale_simple(int(max(width * 128 / height, 1)), 128, gtk.gdk.INTERP_TILES)
+                return thumb.scale_simple(int(max(width * 128 / height, 1)), 128, GdkPixbuf.InterpType.TILES)
     except Exception:
         pass
 
@@ -219,8 +222,8 @@ def _guess_cover(files):
     ext_re = re.compile('\.(' + '|'.join(get_supported_format_extensions_preg()) + ')\s*$', re.I)
 
     front_re = re.compile('(cover|front)', re.I)
-    images = filter(ext_re.search, files)
-    candidates = filter(front_re.search, images)
+    images = [f for f in files if ext_re.search(f)]
+    candidates = [f for f in images if front_re.search(f)]
     candidates = [c for c in candidates if 'back' not in c.lower()]
     if candidates:
         return candidates[0]

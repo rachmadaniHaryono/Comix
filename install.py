@@ -220,25 +220,42 @@ def check_dependencies():
     recommended_found = True
     print('Checking dependencies ...\n')
     print('Required dependencies:')
-    # Should also check the PyGTK version. To do that we have to load the
-    # gtk module though, which normally can't be done while using `sudo`.
+    # Check for PyGobject and Pillow dependencies.
     try:
-        import pygtk
-        print('    PyGTK ........................ OK')
-    except ImportError:
-        print('    !!! PyGTK .................... Not found')
-        required_found = False
-    try:
-        import Image
-        assert Image.VERSION >= '1.1.5'
-        print('    Python Imaging Library ....... OK')
-    except ImportError:
-        print('    !!! Python Imaging Library ... Not found')
-        required_found = False
+        # noinspection PyUnresolvedReferences
+        import gi
+
+        gi.require_version('Gtk', '3.0')
+        # noinspection PyUnresolvedReferences
+        from gi.repository import Gtk
+        # noinspection PyUnresolvedReferences
+        from gi.repository import GObject
+
+        GObject.threads_init()
     except AssertionError:
-        print('    !!! Python Imaging Library ... version {} found'.format(Image.VERSION))
-        print('    !!! Python Imaging Library 1.1.5 or higher is required')
+        print("You don't have the required versions of GTK+ and/or PyGObject installed.")
+        print('Installed GTK+ version is: {}'.format('.'.join([str(n) for n in Gtk.gtk_version])))
+        print('Required GTK+ version is: 3.0.3 or higher\n')
         required_found = False
+    except ImportError:
+        print('PyGObject version 3.03 or higher is required to run Comix.')
+        print('No version of PyGObject was found on your system.')
+        required_found = False
+
+    try:
+        # noinspection PyUnresolvedReferences
+        from PIL import Image
+    except ImportError:
+        print('Python Imaging Library (PIL) version 1.1.5 or higher or Pillow is required.')
+        print('No version of the Python Imaging Library was found on your system.')
+        required_found = False
+
+    if not Image.VERSION >= '1.1.5':
+        print("You don't have the required version of Pillow installed. "
+              "Installed Pillow version is: {} Required Pillow "
+              "version is: 1.1.5 or higher".format(Image.VERSION))
+        required_found = False
+
     print('\nRecommended dependencies:')
     # rar/unrar is only a requirement to read RAR (.cbr) files.
     rar = False
@@ -299,13 +316,12 @@ if args == ['install']:
             install(src, dst)
         for src, link in MIME_LINKS:
             make_link(src, link)
-        os.popen('update-mime-database "%s"' %
-                 os.path.join(install_dir, 'share/mime'))
+        os.popen('update-mime-database "{}"'.format(os.path.join(install_dir, 'share/mime')))
         print('\nUpdated mime database (added .cbz, .cbr and .cbt file types.)')
         schema = os.path.join(source_dir, 'mime/comicbook.schemas')
         os.popen('GCONF_CONFIG_SOURCE=$(gconftool-2 --get-default-source) '
-                 'gconftool-2 --makefile-install-rule "%s" 2>/dev/null' %
-                 schema)
+                 'gconftool-2 --makefile-install-rule "{}" 2>/dev/null'
+                 .format(schema))
         print('\nRegistered comic archive thumbnailer in gconf (if available).')
         print('The thumbnailer is only supported by some file '
               'managers such as Nautilus and Thunar. You might'

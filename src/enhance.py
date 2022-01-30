@@ -4,7 +4,7 @@ brightness etc.)
 """
 from __future__ import absolute_import
 
-import gtk
+from gi.repository import Gtk
 
 from src import histogram
 from src import image
@@ -28,7 +28,8 @@ class ImageEnhancer(object):
 
     def enhance(self, pixbuf):
         """Return an "enhanced" version of <pixbuf>."""
-        if any([self.brightness != 1.0, self.contrast != 1.0, self.saturation != 1.0, self.sharpness != 1.0, self.autocontrast]):
+        if any([self.brightness != 1.0, self.contrast != 1.0, self.saturation != 1.0, self.sharpness != 1.0,
+                self.autocontrast]):
             return image.enhance(pixbuf, self.brightness, self.contrast,
                                  self.saturation, self.sharpness, self.autocontrast)
         return pixbuf
@@ -40,90 +41,88 @@ class ImageEnhancer(object):
         self._window.draw_image(scroll=False)
 
 
-class _EnhanceImageDialog(gtk.Dialog):
-    """A gtk.Dialog which allows modification of the values belonging to
+class _EnhanceImageDialog(Gtk.Dialog):
+    """
+    A Gtk.Dialog which allows modification of the values belonging to
     an ImageEnhancer.
     """
 
     def __init__(self, window):
-        gtk.Dialog.__init__(self, _('Enhance image'), window, 0)
-        self.add_buttons(_('Defaults'), gtk.RESPONSE_NO,
-                         gtk.STOCK_OK, gtk.RESPONSE_OK)
-        self.set_has_separator(False)
+        super(_EnhanceImageDialog, self).__init__(title=_('Enhance image'), parent=window, flags=0)
+        self.add_buttons(_('Defaults'), Gtk.ResponseType.NO,
+                         Gtk.STOCK_OK, Gtk.ResponseType.OK)
         self.set_resizable(False)
         self.connect('response', self._response)
-        self.set_default_response(gtk.RESPONSE_OK)
+        self.set_default_response(Gtk.ResponseType.OK)
 
         self._enhancer = window.enhancer
         self._block = False
 
-        vbox = gtk.VBox(False, 10)
+        vbox = Gtk.VBox(False, 10)
         self.set_border_width(4)
         vbox.set_border_width(6)
         self.vbox.add(vbox)
 
-        self._hist_image = gtk.Image()
+        self._hist_image = Gtk.Image()
         self._hist_image.set_size_request(262, 170)
-        vbox.pack_start(self._hist_image)
-        vbox.pack_start(gtk.HSeparator())
+        vbox.pack_start(self._hist_image, True, True, 0)
+        vbox.pack_start(Gtk.HSeparator.new(True, True, 0))
 
-        hbox = gtk.HBox(False, 4)
+        hbox = Gtk.HBox(False, 4)
         vbox.pack_start(hbox, False, False, 2)
-        vbox_left = gtk.VBox(False, 4)
-        vbox_right = gtk.VBox(False, 4)
+        vbox_left = Gtk.VBox(False, 4)
+        vbox_right = Gtk.VBox(False, 4)
         hbox.pack_start(vbox_left, False, False, 2)
         hbox.pack_start(vbox_right, True, True, 2)
 
-        label = gtk.Label(_('Brightness') + ':')
+        label = Gtk.Label(label=_('Brightness') + ':')
         label.set_alignment(1, 0.5)
         vbox_left.pack_start(label, True, False, 2)
-        adj = gtk.Adjustment(0.0, -1.0, 1.0, 0.01, 0.1)
-        self._brightness_scale = gtk.HScale(adj)
+        adj = Gtk.Adjustment(0.0, -1.0, 1.0, 0.01, 0.1)
+        self._brightness_scale = Gtk.HScale.new(adj)
         self._brightness_scale.set_digits(2)
-        self._brightness_scale.set_value_pos(gtk.POS_RIGHT)
+        self._brightness_scale.set_value_pos(Gtk.PositionType.RIGHT)
         self._brightness_scale.connect('value-changed', self._change_values)
-        self._brightness_scale.set_update_policy(gtk.UPDATE_DELAYED)
+        # self._brightness_scale.set_update_policy(Gtk.UPDATE_DELAYED) # TODO Removed in GTK3
         vbox_right.pack_start(self._brightness_scale, True, False, 2)
 
-        label = gtk.Label(_('Contrast') + ':')
+        label = Gtk.Label(label=_('Contrast') + ':')
         label.set_alignment(1, 0.5)
         vbox_left.pack_start(label, True, False, 2)
-        adj = gtk.Adjustment(0.0, -1.0, 1.0, 0.01, 0.1)
-        self._contrast_scale = gtk.HScale(adj)
+        adj = Gtk.Adjustment(0.0, -1.0, 1.0, 0.01, 0.1)
+        self._contrast_scale = Gtk.HScale.new(adj)
         self._contrast_scale.set_digits(2)
-        self._contrast_scale.set_value_pos(gtk.POS_RIGHT)
+        self._contrast_scale.set_value_pos(Gtk.PositionType.RIGHT)
         self._contrast_scale.connect('value-changed', self._change_values)
-        self._contrast_scale.set_update_policy(gtk.UPDATE_DELAYED)
+        # self._contrast_scale.set_update_policy(Gtk.UPDATE_DELAYED) # TODO Removed in GTK3
         vbox_right.pack_start(self._contrast_scale, True, False, 2)
 
-        label = gtk.Label(_('Saturation') + ':')
+        label = Gtk.Label(label=_('Saturation') + ':')
         label.set_alignment(1, 0.5)
         vbox_left.pack_start(label, True, False, 2)
-        adj = gtk.Adjustment(0.0, -1.0, 1.0, 0.01, 0.1)
-        self._saturation_scale = gtk.HScale(adj)
+        adj = Gtk.Adjustment(0.0, -1.0, 1.0, 0.01, 0.1)
+        self._saturation_scale = Gtk.HScale.new(adj)
         self._saturation_scale.set_digits(2)
-        self._saturation_scale.set_value_pos(gtk.POS_RIGHT)
+        self._saturation_scale.set_value_pos(Gtk.PositionType.RIGHT)
         self._saturation_scale.connect('value-changed', self._change_values)
-        self._saturation_scale.set_update_policy(gtk.UPDATE_DELAYED)
+        # self._saturation_scale.set_update_policy(Gtk.UPDATE_DELAYED) # TODO Removed in GTK3
         vbox_right.pack_start(self._saturation_scale, True, False, 2)
 
-        label = gtk.Label(_('Sharpness') + ':')
+        label = Gtk.Label(label=_('Sharpness') + ':')
         label.set_alignment(1, 0.5)
         vbox_left.pack_start(label, True, False, 2)
-        adj = gtk.Adjustment(0.0, -1.0, 1.0, 0.01, 0.1)
-        self._sharpness_scale = gtk.HScale(adj)
+        adj = Gtk.Adjustment(0.0, -1.0, 1.0, 0.01, 0.1)
+        self._sharpness_scale = Gtk.HScale.new(adj)
         self._sharpness_scale.set_digits(2)
-        self._sharpness_scale.set_value_pos(gtk.POS_RIGHT)
+        self._sharpness_scale.set_value_pos(Gtk.PositionType.RIGHT)
         self._sharpness_scale.connect('value-changed', self._change_values)
-        self._sharpness_scale.set_update_policy(gtk.UPDATE_DELAYED)
+        # self._sharpness_scale.set_update_policy(Gtk.UPDATE_DELAYED) # TODO Removed in GTK3
         vbox_right.pack_start(self._sharpness_scale, True, False, 2)
 
-        vbox.pack_start(gtk.HSeparator())
+        vbox.pack_start(Gtk.HSeparator.new(True, True, 0))
 
-        self._autocontrast_button = \
-            gtk.CheckButton(_('Automatically adjust contrast.'))
-        self._autocontrast_button.set_tooltip_text(
-                _('Automatically adjust contrast (both lightness and darkness), separately for each colour band.'))
+        self._autocontrast_button = Gtk.CheckButton(_('Automatically adjust contrast.'))
+        self._autocontrast_button.set_tooltip_text(_('Automatically adjust contrast (both lightness and darkness), separately for each colour band.'))
         vbox.pack_start(self._autocontrast_button, False, False, 2)
         self._autocontrast_button.connect('toggled', self._change_values)
 
@@ -134,8 +133,7 @@ class _EnhanceImageDialog(gtk.Dialog):
         self._sharpness_scale.set_value(self._enhancer.sharpness - 1)
         self._autocontrast_button.set_active(self._enhancer.autocontrast)
         self._block = False
-        self._contrast_scale.set_sensitive(
-                not self._autocontrast_button.get_active())
+        self._contrast_scale.set_sensitive(not self._autocontrast_button.get_active())
 
         self.show_all()
 
@@ -163,9 +161,9 @@ class _EnhanceImageDialog(gtk.Dialog):
         self._enhancer.signal_update()
 
     def _response(self, dialog, response):
-        if response in [gtk.RESPONSE_OK, gtk.RESPONSE_DELETE_EVENT]:
+        if response in [Gtk.ResponseType.OK, Gtk.ResponseType.DELETE_EVENT]:
             _close_dialog()
-        elif response == gtk.RESPONSE_NO:
+        elif response == Gtk.ResponseType.NO:
             self._block = True
             self._brightness_scale.set_value(0.0)
             self._contrast_scale.set_value(0.0)

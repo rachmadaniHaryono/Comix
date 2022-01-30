@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # coding=utf-8
+from __future__ import absolute_import, print_function
+
 """Comix - GTK Comic Book Viewer
 
 Copyright (C) 2005-2009 Pontus Ekberg
 <herrekberg@users.sourceforge.net>
 """
-from __future__ import print_function, absolute_import
 
 # -------------------------------------------------------------------------
 # This program is free software; you can redistribute it and/or modify
@@ -28,32 +29,35 @@ import os
 import signal
 import sys
 
-# Check for PyGTK and PIL dependencies.
+# Check for PyGobject and Pillow dependencies.
 try:
-    import pygtk
+    # noinspection PyUnresolvedReferences
+    import gi
 
-    pygtk.require('2.0')
-    import gtk
+    gi.require_version("Gtk", "3.0")
+    # noinspection PyUnresolvedReferences
+    from gi.repository import Gtk
 
-    assert gtk.gtk_version >= (2, 12, 0)
-    assert gtk.pygtk_version >= (2, 12, 0)
-    import gobject
+    # noinspection PyUnresolvedReferences
+    from gi.repository import GObject
 
-    gobject.threads_init()
+    GObject.threads_init()
 except AssertionError:
-    print("You don't have the required versions of GTK+ and/or PyGTK "
-          "installed.")
-    print('Installed GTK+ version is: {}'.format('.'.join([str(n) for n in gtk.gtk_version])))
-    print('Required GTK+ version is: 2.12.0 or higher\n')
-    print('Installed PyGTK version is: {}'.format('.'.join([str(n) for n in gtk.pygtk_version])))
-    print('Required PyGTK version is: 2.12.0 or higher')
+    print("You don't have the required versions of GTK+ and/or PyGObject installed.")
+    print(
+        "Installed GTK+ version is: {}".format(
+            ".".join([str(n) for n in Gtk.gtk_version])
+        )
+    )
+    print("Required GTK+ version is: 3.0.3 or higher\n")
     sys.exit(1)
 except ImportError:
-    print('PyGTK version 2.12.0 or higher is required to run Comix.')
-    print('No version of PyGTK was found on your system.')
+    print("PyGObject version 3.0.3 or higher is required to run Comix.")
+    print("No version of PyGObject was found on your system.")
     sys.exit(1)
 
 try:
+    # noinspection PyUnresolvedReferences
     from PIL import Image
 except ImportError:
     print('Python Imaging Library (PIL) version 1.1.5 or higher or Pillow is required.')
@@ -68,7 +72,7 @@ if not Image.VERSION >= '1.1.5':
 
 from src import constants
 from src import deprecated
-from src import main
+from src.main import MainWindow
 from src import icons
 from src import preferences
 
@@ -92,12 +96,10 @@ def run(argv):
     # the install path.
     exec_path = os.path.abspath(argv[0])
     base_dir = os.path.dirname(os.path.dirname(exec_path))
-    if os.path.isdir(os.path.join(base_dir, 'messages')):
-        gettext.install('comix', os.path.join(base_dir, 'messages'),
-                        unicode=True)
+    if os.path.isdir(os.path.join(base_dir, "messages")):
+        gettext.install("comix", os.path.join(base_dir, "messages"))
     else:
-        gettext.install('comix', os.path.join(base_dir, 'share/locale'),
-                        unicode=True)
+        gettext.install("comix", os.path.join(base_dir, "share/locale"))
 
     animate_gifs = False
     fullscreen = False
@@ -109,6 +111,7 @@ def run(argv):
             argv[1:], "fhla", ["fullscreen", "help", "library", "animate-gifs"]
         )
     except getopt.GetoptError:
+        opts = args = []
         print_help()
     for opt, value in opts:
         if opt in ('-h', '--help'):
@@ -122,8 +125,10 @@ def run(argv):
 
     if not os.path.exists(constants.DATA_DIR):
         os.makedirs(constants.DATA_DIR, 0o700)
+
     if not os.path.exists(constants.CONFIG_DIR):
         os.makedirs(constants.CONFIG_DIR, 0o700)
+
     deprecated.move_files_to_xdg_dirs()
     preferences.read_preferences_file()
     icons.load_icons()
@@ -134,18 +139,22 @@ def run(argv):
         open_path = preferences.prefs['path to last file']
         open_page = preferences.prefs['page of last file']
 
-    window = main.MainWindow(animate_gifs=animate_gifs,
-                             fullscreen=fullscreen, show_library=show_library,
-                             open_path=open_path, open_page=open_page)
+    window = MainWindow(
+        animate_gifs=animate_gifs,
+        fullscreen=fullscreen,
+        show_library=show_library,
+        open_path=open_path,
+        open_page=open_page,
+    )
     deprecated.check_for_deprecated_files(window)
 
     def sigterm_handler(signal, frame):
-        gobject.idle_add(window.terminate_program)
+        GObject.idle_add(window.terminate_program)
 
     signal.signal(signal.SIGTERM, sigterm_handler)
 
     try:
-        gtk.main()
+        Gtk.main()
     except KeyboardInterrupt:  # Will not always work because of threading.
         window.terminate_program()
 

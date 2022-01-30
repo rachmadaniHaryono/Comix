@@ -12,6 +12,9 @@ class Process(object):
     often (once is too often) in Comix when calling "rar" or "unrar" to
     extract specific files from archives. We roll our own very simple
     process spawning module here instead.
+
+    TODO This issue was fixed in 2.6.  This code should be removed.
+
     """
 
     # TODO: I can no longer reproduce the issue. Check if this version of

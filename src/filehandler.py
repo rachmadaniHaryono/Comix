@@ -1,6 +1,6 @@
 # coding=utf-8
 """filehandler.py - File handler."""
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 import gc
 import os
@@ -10,7 +10,7 @@ import sys
 import tempfile
 import threading
 
-import gtk
+from gi.repository import Gtk, GdkPixbuf
 
 from src import archive
 from src import cursor
@@ -22,6 +22,7 @@ from src.preferences import prefs
 
 # Compatibility
 try:
+    # noinspection PyUnresolvedReferences
     range = xrange  # Python2
 except NameError:
     pass
@@ -72,9 +73,9 @@ class FileHandler(object):
                 If it isn't animated, load a pixbuf instead.  """
                 if not (prefs['animate gifs'] or prefs['animate']) \
                         or "gif" not in self._image_files[index][-3:].lower():
-                    self._raw_pixbufs[index] = gtk.gdk.pixbuf_new_from_file(self._image_files[index])
+                    self._raw_pixbufs[index] = GdkPixbuf.Pixbuf.new_from_file(self._image_files[index])
                 else:
-                    self._raw_pixbufs[index] = gtk.gdk.PixbufAnimation(self._image_files[index])
+                    self._raw_pixbufs[index] = GdkPixbuf.PixbufAnimation(self._image_files[index])
                     if self._raw_pixbufs[index].is_static_image():
                         self._raw_pixbufs[index] = self._raw_pixbufs[index].get_static_image()
             except Exception:
@@ -230,7 +231,7 @@ class FileHandler(object):
         # (bad idea if it's permanently hidden; but no better way nearby)
         if not os.access(path, os.R_OK):
             self._window.statusbar.set_message(
-                    _('Could not open %s: Permission denied.') % path)
+                    _('Could not open {}: Permission denied.').format(path))
             return False
         if os.path.isdir(path):
             dir_path = path  # handle it as a directory later.
@@ -238,21 +239,19 @@ class FileHandler(object):
             # getting 'unknown type'.
         elif not os.path.isfile(path):  # ...not dir or normal file.
             self._window.statusbar.set_message(
-                    _('Could not open %s: No such file.') % path)
+                    _('Could not open {}: No such file.').format(path))
             return False
         self.archive_type = archive.archive_mime_type(path)
-        if self.archive_type is None and not is_image_file(path) and \
-                not dir_path:
-            self._window.statusbar.set_message(
-                    _('Could not open %s: Unknown file type.') % path)
+        if self.archive_type is None and not is_image_file(path) and not dir_path:
+            self._window.statusbar.set_message(_('Could not open {}: Unknown file type.').format(path))
             return False
 
         # We close the previously opened file.
         self._window.cursor_handler.set_cursor_type(cursor.WAIT)
         if self.file_loaded:
             self.close_file()
-        while gtk.events_pending():
-            gtk.main_iteration(False)
+        while Gtk.events_pending():
+            Gtk.main_iteration()
 
         unknown_files = []
         # If <path> is an archive we create an Extractor for it and set the
@@ -262,12 +261,11 @@ class FileHandler(object):
             self._base_path = path
             self._condition = self._extractor.setup(path, self._tmp_dir)
             files = self._extractor.get_files()
-            image_files = filter(self._image_re.search, files)
+            image_files = [f for f in files if self._image_re.search(f)]
             alphanumeric_sort(image_files)
-            comment_files = filter(self._comment_re.search, files)
+            comment_files = [f for f in files if self._comment_re.search(f)]
             # Allow managing sub-archives
-            unknown_files = \
-                filter(lambda i: i not in image_files + comment_files, files)
+            unknown_files = [f for f in files if f not in image_files + comment_files]
             self._image_files = \
                 [os.path.join(self._tmp_dir, f) for f in image_files]
             self._comment_files = \
@@ -319,10 +317,8 @@ class FileHandler(object):
                     dst = self._tmp_dir + dst
                     shutil.move(filename, dst)
                     self._image_files.append(dst)
-                self._comment_files = \
-                    filter(self._comment_re.search, self._image_files)
-                self._image_files = \
-                    filter(self._image_re.search, self._image_files)
+                self._comment_files = [f for f in self._image_files if self._comment_re.search(f)]
+                self._image_files = [f for f in self._image_files if self._image_re.search(f)]
                 alphanumeric_sort(self._image_files)
                 self._name_table.clear()
                 for full_path in self._image_files + self._comment_files:
@@ -332,8 +328,8 @@ class FileHandler(object):
                 self._redo_priority_ordering(start_page, self._image_files)
 
         if not self._image_files:
-            self._window.statusbar.set_message(_("No images or subarchives in '%s'") %
-                                               os.path.basename(path))
+            self._window.statusbar.set_message(_("No images or subarchives in '{}'").format(
+                                               os.path.basename(path)))
             self.file_loaded = False
         else:
             self.file_loaded = True
@@ -356,10 +352,10 @@ class FileHandler(object):
 
         depth = self._window.is_double_page and 2 or 1
         priority_ordering = (
-            range(self._current_image_index,
-                  self._current_image_index + depth * 2) +
-            range(self._current_image_index - depth,
-                  self._current_image_index)[::-1])
+            list(range(self._current_image_index,
+                  self._current_image_index + depth * 2)) +
+            list(range(self._current_image_index - depth,
+                  self._current_image_index))[::-1])
         priority_ordering = [lst[p] for p in priority_ordering
                              if 0 <= p <= self.get_number_of_pages() - 1]
         for i, name in enumerate(priority_ordering):
@@ -446,7 +442,7 @@ class FileHandler(object):
         archives by their filename.
         """
         exts = '|'.join(prefs['comment extensions'])
-        self._comment_re = re.compile(r'\.(%s)\s*$' % exts, re.I)
+        self._comment_re = re.compile(r'\.({})\s*$'.format(exts), re.I)
 
     def get_path_to_page(self, page=None):
         """Return the full path to the image file for <page>, or the current
@@ -507,7 +503,7 @@ class FileHandler(object):
         is None, return the size of the current page.
         """
         self._wait_on_page(page)
-        info = gtk.gdk.pixbuf_get_file_info(self.get_path_to_page(page))
+        info = GdkPixbuf.Pixbuf.get_file_info(self.get_path_to_page(page))
         if info is not None:
             return info[1], info[2]
         return 0, 0
@@ -517,7 +513,7 @@ class FileHandler(object):
         <page> is None, return the mime type name of the current page.
         """
         self._wait_on_page(page)
-        info = gtk.gdk.pixbuf_get_file_info(self.get_path_to_page(page))
+        info = GdkPixbuf.Pixbuf.get_file_info(self.get_path_to_page(page))
         if info is not None:
             return info[0]['name'].upper()
         return _('Unknown filetype')
@@ -537,17 +533,17 @@ class FileHandler(object):
         else:
             try:
                 if "gif" not in path[-3:].lower():
-                    thumb = gtk.gdk.pixbuf_new_from_file_at_size(path, width, height)
+                    thumb = GdkPixbuf.Pixbuf.new_from_file_at_size(path, width, height)
                 else:
-                    thumb = gtk.gdk.PixbufAnimation(path).get_static_image()
+                    thumb = GdkPixbuf.PixbufAnimation(path).get_static_image()
                     src_width = thumb.get_width()
                     src_height = thumb.get_height()
                     if float(src_width) / width > float(src_height) / height:
                         thumb = thumb.scale_simple(width,
-                                                   int(max(src_height * width / src_width, 1)), gtk.gdk.INTERP_TILES)
+                                                   int(max(src_height * width / src_width, 1)), GdkPixbuf.InterpType.TILES)
                     else:
                         thumb = thumb.scale_simple(int(max(src_width * height / src_height, 1)),
-                                                   height, gtk.gdk.INTERP_TILES)
+                                                   height, GdkPixbuf.InterpType.TILES)
             except Exception:
                 thumb = None
         if thumb is None:
@@ -615,8 +611,8 @@ class FileHandler(object):
 
     def _get_missing_image(self):
         """Return a pixbuf depicting a missing/broken image."""
-        return self._window.render_icon(gtk.STOCK_MISSING_IMAGE,
-                                        gtk.ICON_SIZE_DIALOG)
+        return self._window.render_icon(Gtk.STOCK_MISSING_IMAGE,
+                                        Gtk.IconSize.DIALOG)
 
     def _wait_on_page(self, page):
         """Block the running (main) thread until the file corresponding to
@@ -659,7 +655,7 @@ def is_image_file(path):
     """Return True if the file at <path> is an image file recognized by PyGTK.
     """
     if os.path.isfile(path):
-        info = gtk.gdk.pixbuf_get_file_info(path)
+        info = GdkPixbuf.Pixbuf.get_file_info(path)
         return info is not None
     return False
 
@@ -676,14 +672,15 @@ def alphanumeric_sort(filenames):
         return s.lower()
 
     rec = re.compile("\d+|\D+")
-    filenames.sort(key=lambda s: map(_format_substring, rec.findall(s)))
+    filenames.sort(key=lambda s: [_format_substring(i) for i in rec.findall(s)])
 
 
 def list_dir_sorted(dir_name):
-    """ Helper for listing the directory contents with the preferred
-    sorting.  """
+    """
+    Helper for listing the directory contents with the preferred
+    sorting.
+     """
     files = os.listdir(dir_name)
-    # files.sort(locale.strcoll)
     alphanumeric_sort(files)
     return files
 

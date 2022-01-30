@@ -1,11 +1,11 @@
 # coding=utf-8
 """image.py - Various image manipulations."""
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
-import gtk
 from PIL import Image
 from PIL import ImageEnhance
 from PIL import ImageOps
+from gi.repository import Gdk, GdkPixbuf
 
 from src.preferences import prefs
 
@@ -79,10 +79,10 @@ def fit_in_rectangle(src, width, height, scale_up=False, rotation=0,
         if src.get_has_alpha():
             if prefs['checkered bg for transparent images']:
                 src = src.composite_color_simple(src_width, src_height,
-                                                 gtk.gdk.INTERP_TILES, 255, 8, 0x777777, 0x999999)
+                                                 GdkPixbuf.InterpType.TILES, 255, 8, 0x777777, 0x999999)
             else:
                 src = src.composite_color_simple(src_width, src_height,
-                                                 gtk.gdk.INTERP_TILES, 255, 1024, 0xFFFFFF, 0xFFFFFF)
+                                                 GdkPixbuf.InterpType.TILES, 255, 1024, 0xFFFFFF, 0xFFFFFF)
     else:
         if float(src_width) / width > float(src_height) / height:
             height = int(max(src_height * width / src_width, 1))
@@ -92,19 +92,19 @@ def fit_in_rectangle(src, width, height, scale_up=False, rotation=0,
         if src.get_has_alpha():
             if prefs['checkered bg for transparent images']:
                 src = src.composite_color_simple(width, height,
-                                                 gtk.gdk.INTERP_TILES, 255, 8, 0x777777, 0x999999)
+                                                 GdkPixbuf.InterpType.TILES, 255, 8, 0x777777, 0x999999)
             else:
                 src = src.composite_color_simple(width, height,
-                                                 gtk.gdk.INTERP_TILES, 255, 1024, 0xFFFFFF, 0xFFFFFF)
+                                                 GdkPixbuf.InterpType.TILES, 255, 1024, 0xFFFFFF, 0xFFFFFF)
         else:
-            src = src.scale_simple(width, height, gtk.gdk.INTERP_TILES)
+            src = src.scale_simple(width, height, GdkPixbuf.InterpType.TILES)
 
     if rotation == 90:
-        src = src.rotate_simple(gtk.gdk.PIXBUF_ROTATE_CLOCKWISE)
+        src = src.rotate_simple(Gdk.PIXBUF_ROTATE_CLOCKWISE)
     elif rotation == 180:
-        src = src.rotate_simple(gtk.gdk.PIXBUF_ROTATE_UPSIDEDOWN)
+        src = src.rotate_simple(Gdk.PIXBUF_ROTATE_UPSIDEDOWN)
     elif rotation == 270:
-        src = src.rotate_simple(gtk.gdk.PIXBUF_ROTATE_COUNTERCLOCKWISE)
+        src = src.rotate_simple(Gdk.PIXBUF_ROTATE_COUNTERCLOCKWISE)
     return src
 
 
@@ -175,12 +175,13 @@ def add_border(pixbuf, thickness, colour=0x000000FF):
     """Return a pixbuf from <pixbuf> with a <thickness> px border of
     <colour> added.
     """
-    canvas = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8,
-                            pixbuf.get_width() + thickness * 2,
-                            pixbuf.get_height() + thickness * 2)
+    canvas = GdkPixbuf.Pixbuf.new(colorspace=GdkPixbuf.Colorspace.RGB,
+                                  has_alpha=True,
+                                  bits_per_sample=8,
+                                  width=pixbuf.get_width() + thickness * 2,
+                                  height=pixbuf.get_height() + thickness * 2)
     canvas.fill(colour)
-    pixbuf.copy_area(0, 0, pixbuf.get_width(), pixbuf.get_height(),
-                     canvas, thickness, thickness)
+    pixbuf.copy_area(0, 0, pixbuf.get_width(), pixbuf.get_height(), canvas, thickness, thickness)
     return canvas
 
 
@@ -192,14 +193,14 @@ def get_most_common_edge_colour(pixbuf):
     Note: This could be done more cleanly with subpixbuf(), but that
     doesn't work as expected together with get_pixels().
     """
-    if isinstance(pixbuf, gtk.gdk.PixbufAnimation):
+    if isinstance(pixbuf, GdkPixbuf.PixbufAnimation):
         pixbuf = pixbuf.get_static_image()
     width = pixbuf.get_width()
     height = pixbuf.get_height()
-    top_edge = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, width, 1)
-    bottom_edge = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, width, 1)
-    left_edge = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, 1, height)
-    right_edge = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, 1, height)
+    top_edge = GdkPixbuf.Pixbuf.new(colorspace=GdkPixbuf.Colorspace.RGB, has_alpha=True, bits_per_sample=8, width=width, height=1)
+    bottom_edge = GdkPixbuf.Pixbuf.new(colorspace=GdkPixbuf.Colorspace.RGB, has_alpha=True, bits_per_sample=8, width=width, height=1)
+    left_edge = GdkPixbuf.Pixbuf.new(colorspace=GdkPixbuf.Colorspace.RGB, has_alpha=True, bits_per_sample=8, width=1, height=height)
+    right_edge = GdkPixbuf.Pixbuf.new(colorspace=GdkPixbuf.Colorspace.RGB, has_alpha=True, bits_per_sample=8, width=1, height=height)
     pixbuf.copy_area(0, 0, width, 1, top_edge, 0, 0)
     pixbuf.copy_area(0, height - 1, width, 1, bottom_edge, 0, 0)
     pixbuf.copy_area(0, 0, 1, height, left_edge, 0, 0)
@@ -230,9 +231,9 @@ def pil_to_pixbuf(image):
         imagestr = image.tobytes()
     else:
         raise ValueError("Image object not PIL object? Or not compatible!")
-    return gtk.gdk.pixbuf_new_from_data(imagestr, gtk.gdk.COLORSPACE_RGB,
-                                        IS_RGBA, 8, image.size[0], image.size[1],
-                                        (IS_RGBA and 4 or 3) * image.size[0])
+    return GdkPixbuf.Pixbuf.new_from_data(imagestr, GdkPixbuf.Colorspace.RGB,
+                                          IS_RGBA, 8, image.size[0], image.size[1],
+                                          (IS_RGBA and 4 or 3) * image.size[0])
 
 
 def pixbuf_to_pil(pixbuf):
@@ -275,7 +276,7 @@ def get_implied_rotation(pixbuf):
     by a camera that is held sideways might store this fact in its EXIF data,
     and the pixbuf loader will set the orientation option correspondingly.
     """
-    if isinstance(pixbuf, gtk.gdk.PixbufAnimation):
+    if isinstance(pixbuf, GdkPixbuf.PixbufAnimation):
         pixbuf = pixbuf.get_static_image()
     orientation = pixbuf.get_option('orientation')
     if orientation == '3':

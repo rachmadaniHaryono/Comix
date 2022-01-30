@@ -1,46 +1,42 @@
 # coding=utf-8
-"""labels.py - gtk.Label convenience classes."""
+"""labels.py - Gtk.Label convenience classes."""
 from __future__ import absolute_import
 
-import gtk
-import pango
+from gi.repository import Gtk
 
 
-class FormattedLabel(gtk.Label):
+class FormattedLabel(Gtk.Label):
     """FormattedLabel keeps a label always formatted with some pango weight,
     style and scale, even when new text is set using set_text().
     """
 
-    def __init__(self, text='', weight=pango.WEIGHT_NORMAL,
-                 style=pango.STYLE_NORMAL, scale=pango.SCALE_MEDIUM):
-        gtk.Label.__init__(self, text)
-        self._weight = weight
-        self._style = style
-        self._scale = scale
+    def __init__(self, text=''):
+        super(FormattedLabel, self).__init__(text)
         self._format()
 
     def set_text(self, text):
-        gtk.Label.set_text(self, text)
+        super(FormattedLabel, self).set_text(text)
         self._format()
 
     def _format(self):
-        text_len = len(self.get_text())
-        attrlist = pango.AttrList()
-        attrlist.insert(pango.AttrWeight(self._weight, 0, text_len))
-        attrlist.insert(pango.AttrStyle(self._style, 0, text_len))
-        attrlist.insert(pango.AttrScale(self._scale, 0, text_len))
-        self.set_attributes(attrlist)
+        self.set_markup("<b>{}</b>".format(self.get_label()))
 
 
 class BoldLabel(FormattedLabel):
     """A FormattedLabel that is always bold and otherwise normal."""
 
     def __init__(self, text=''):
-        FormattedLabel.__init__(self, text, weight=pango.WEIGHT_BOLD)
+        super(BoldLabel, self).__init__(text)
+
+    def _format(self):
+        self.set_markup("<b>{}</b>".format(self.get_label()))
 
 
 class ItalicLabel(FormattedLabel):
     """A FormattedLabel that is always italic and otherwise normal."""
 
     def __init__(self, text=''):
-        FormattedLabel.__init__(self, text, style=pango.STYLE_ITALIC)
+        super(ItalicLabel, self).__init__(text)
+
+    def _format(self):
+        self.set_markup("<i>{}</i>".format(self.get_label()))
