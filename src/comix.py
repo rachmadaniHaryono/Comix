@@ -36,10 +36,8 @@ try:
 
     gi.require_version("Gtk", "3.0")
     # noinspection PyUnresolvedReferences
-    from gi.repository import Gtk
-
     # noinspection PyUnresolvedReferences
-    from gi.repository import GObject
+    from gi.repository import GObject, Gtk
 
     GObject.threads_init()
 except AssertionError:
@@ -64,17 +62,9 @@ except ImportError:
     print('No version of the Python Imaging Library was found on your system.')
     sys.exit(1)
 
-if not Image.VERSION >= '1.1.5':
-    print("You don't have the required version of Pillow installed. "
-          "Installed Pillow version is: {} Required Pillow "
-          "version is: 1.1.5 or higher".format(Image.VERSION))
-    sys.exit(1)
 
-from src import constants
-from src import deprecated
+from src import constants, deprecated, icons, preferences
 from src.main import MainWindow
-from src import icons
-from src import preferences
 
 
 def print_help():

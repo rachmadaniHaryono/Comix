@@ -5,13 +5,14 @@ from __future__ import absolute_import
 import os
 import sys
 
+from gi.repository import GdkPixbuf, GLib, Gtk
 from PIL import Image
-from gi.repository import GLib, GdkPixbuf, Gtk
 
-from src import constants
-from src import labels
+from src import constants, labels
 
-ImageVersion = "Pillow-{}".format(Image.PILLOW_VERSION)
+ImageVersion = "Pillow-{}".format(
+    Image.PILLOW_VERSION if hasattr(Image, "PILLOW_VERSION") else Image.__version__
+)
 
 _dialog = None
 
