@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
-
-from __future__ import print_function
-
 """Comix - GTK Comic Book Viewer
 
 Copyright (C) 2005-2009 Pontus Ekberg
 <herrekberg@users.sourceforge.net>
 """
+from __future__ import print_function, absolute_import
 
 # -------------------------------------------------------------------------
 # This program is free software; you can redistribute it and/or modify
@@ -23,7 +21,6 @@ Copyright (C) 2005-2009 Pontus Ekberg
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # -------------------------------------------------------------------------
-from __future__ import absolute_import
 
 import getopt
 import gettext
