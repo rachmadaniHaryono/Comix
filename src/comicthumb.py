@@ -28,7 +28,7 @@ except ImportError:
 from src.archive import Extractor
 from src.thumbnail import _guess_cover as guess_cover
 
-if __name__ == '__main__':
+def main():
     try:
         in_path = sys.argv[1]
         out_path = sys.argv[2]
@@ -57,3 +57,7 @@ if __name__ == '__main__':
     im = im.convert('RGB')
     im.save(out_path, 'PNG')
     sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
